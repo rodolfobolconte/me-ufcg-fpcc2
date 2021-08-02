@@ -1,0 +1,385 @@
+---
+title: "L4P1 - Exercícios de Inferência"
+author: Rodolfo Bolconte
+date: 21/05/21
+output:
+    word_document: default
+    html_document:
+        rmdformats::readthedown
+    
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      #warning=FALSE, message=FALSE,
+                      fig.width = 8,
+                      fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+theme_set(theme_bw())
+library(boot)
+library(broom)
+library(grid)
+library(gridExtra)
+library(quantreg)
+library(scales)
+```
+
+
+## Relação entre SAT e GPA
+
+Nesse cenário, usaremos dados de resultados de duas avaliações feitas em alunos que se formaram em Computação em uma universidade pública americana.
+
+O primeiro é o SAT: "O exame SAT é um teste padronizado que a maioria das faculdades dos EUA usa para determinar se os alunos devem ser aceitos na instituição." e nossos dados tem a nota em matemática (math_SAT) e expressão verbal (verb_SAT) no SAT dos estudantes.
+
+A segunda nota disponível é a GPA dos alunos, que você pode interpretar como um agregado do desempenho deles no curso. Temos o GPA deles para as matérias de computação (comp_GPA) e no geral (univ_GPA).
+
+### Carregamento e Análise Exploratória dos Dados
+
+```{r}
+q1_dados = read_csv(here::here("data/sat-gpa.csv"), 
+                 col_types = "dddd")
+
+
+q1_gera_densidade <- function(var1, var2, legv1, legv2, cor1, cor2, legx, legy, subtitulo) {
+  ggplot() +
+  geom_density(aes(x=q1_dados[[var1]], fill='var1'), alpha=.5) +
+  geom_density(aes(x=q1_dados[[var2]], fill='var2'), alpha=.5) +
+  scale_fill_manual(name='Legenda:',
+                    values=c('var1'=cor1, 'var2'=cor2),
+                    labels=c(legv1, legv2)) +
+  labs(x=legx, y=legy, subtitle=subtitulo) +
+  theme(text=element_text(size=16), legend.position="bottom")
+}
+
+q1_gera_dispersao <- function(var1, var2, cor1, legx, legy, subtitulo) {
+  ggplot() +
+  geom_point(aes(q1_dados[[var1]], q1_dados[[var2]]), color=cor1, size=3, alpha=.5) +
+  geom_text(x=2.5, y=725, label="Correlação") +
+  labs(x=legx, y=legy, subtitle=subtitulo) +
+  theme(text=element_text(size=16)) +
+  geom_vline(xintercept=mean(q1_dados[[var1]]), color='red') +
+  geom_hline(yintercept=median(q1_dados[[var2]]), color='red')
+}
+```
+
+```{r fig.cap="Gráfico 1.1: Amostragem dos valores SAT de Matemática e Expressão Verbal com (a) a densidade e (b) a dispersão dos mesmos."}
+q1_sat_densidade = q1_gera_densidade("math_SAT", "verb_SAT",
+                                     "Matemática", "Expressão\nVerbal",
+                                     "blue", "red",
+                                     "\nAvaliações", "Densidade\n", '(a)')
+
+q1_sat_dispersao = q1_gera_dispersao("math_SAT", "verb_SAT",
+                                     "#BF3F7F",
+                                     "\nMatemática", "\nExpressão Verbal\n", '(b)')
+
+grid.arrange(q1_sat_densidade, q1_sat_dispersao, ncol=2, widths=c(1.5,1))
+```
+
+Colocando em evidência os valores SAT de Matemática e Expressão Verbal, a partir do Gráfico 1.1 é possível notar em (a) a densidade dos valores, com Matemática tendo uma distribuição bimodal, com o pico maior entre 550 e 625 e o segundo pico entre 650 e 700, já em (b) através da visualização da dispersão, pode-se dizer que segue uma linearidade positiva, em que quanto maior o valor do SAT de uma matéria, é esperado que seja maior para a outra também.
+
+### Questões
+
+```{r fig.cap="Gráfico 1.2: Amostragem dos valores GPA dos cursos de Computação e Gerais com (a) a densidade e (b) a dispersão dos mesmos."}
+q1_gpa_densidade = q1_gera_densidade("comp_GPA", "univ_GPA",
+                                        "Computação", "Geral",
+                                        "green", "orange",
+                                        "\nCursos", "Densidade\n", '(a)')
+
+q1_gpa_dispersao = q1_gera_dispersao("comp_GPA", "univ_GPA",
+                                        "#BFD340",
+                                        "\nComputação", "\nGeral\n", '(b)')
+
+grid.arrange(q1_gpa_densidade, q1_gpa_dispersao, ncol=2, widths=c(1.5,1))
+```
+
+No Gráfico 1.2 (a) é possível perceber que para ambos os cursos, os valores de GPA possuem uma distribuição bimodal, que para o curso de Computação, o pico maior se concentra entre 3 e 3,75, enquanto que o pico menor entre 2 e 2,25, já para os demais cursos a concentração maior de valores se encontra entre 3,25 e 3,5 enquanto uma concentração menor ocorre entre 2,25 e 2,5. Em (b) é possível perceber uma relação linear positiva assim como os valores de SAT, porém evidenciando uma concentração maior de valores a partir de 3 para ambos os cursos.
+
+**1- Como é a correlação entre o desempenho dos alunos em cada uma das dimensões do SAT (verbal e matemática) e seu desempenho nas matérias de computação do curso?**
+
+```{r fig.cap="Gráfico 1.3: Dispersão dos valores SAT das Matérias com o valor de GPA para o curso de Computação, com o cálculo da correlação de Pearson sendo (a) a matéria de Expressão Verbal e (b) a matéria de Matemática."}
+q1_cor_verb = q1_gera_dispersao("comp_GPA", "verb_SAT",
+                                        "blue",
+                                        "", "\nExpressão Verbal\n", '(a)')
+
+q1_cor_verb_spearman = cor(q1_dados$comp_GPA, q1_dados$verb_SAT, method='pearson')
+
+q1_cor_verb = q1_cor_verb +
+  annotate("label", x=2, y=750, hjust=0, vjust=1,
+           label=paste("r =",round(q1_cor_verb_spearman,2)))
+  
+
+
+q1_cor_mat = q1_gera_dispersao("comp_GPA", "math_SAT",
+                                        "red",
+                                        "", "\nMatemática\n", '(b)')
+
+q1_cor_mat_spearman = cor(q1_dados$comp_GPA, q1_dados$math_SAT, method='pearson')
+
+q1_cor_mat = q1_cor_mat +
+  annotate("label", x=2, y=750, hjust=0, vjust=1,
+           label=paste("r =",round(q1_cor_mat_spearman,2)))
+
+
+grid.arrange(q1_cor_verb, q1_cor_mat, ncol=2, bottom = textGrob("Computação",gp = gpar(fontsize=16)))
+```
+
+```{r}
+#CALCULO DE THETA
+correlacao <- function(dataset, indices, col1, col2, col3) {
+  agrup = dataset %>%
+    slice(indices)
+  
+  cor(agrup[[col1]], agrup[[col2]], method='pearson')
+}
+
+#FUNÇÃO QUE EXECUTA BOOTSTRAP E CALCULA THETA
+ic = function(dados, col1, col2, col3, estatistica) {
+    
+    set.seed(123)
+
+    #GERAÇÃO DO BOOTSTRAP    
+    resultado_bootstrap = boot(data = dados,
+           statistic = estatistica,
+           R = 2000,
+           col1=col1,
+           col2=col2,
+           col=col3) %>%
+    tidy(conf.level = .95,
+         conf.method = "bca",
+         conf.int = TRUE)
+    
+    resultado_bootstrap %>% 
+      mutate(materia=col2)
+}
+```
+
+```{r}
+q1_boot_comp_cor = bind_rows(ic(q1_dados, "comp_GPA", "math_SAT", "", correlacao),
+                         ic(q1_dados, "comp_GPA", "verb_SAT", "", correlacao))
+
+q1_boot_comp_cor
+```
+
+```{r fig.cap="Gráfico 1.4: Índice de Confiança de 95% da Correlação de Pearson das Matérias com o Curso de Computação."}
+q1_boot_comp_cor %>% 
+  ggplot(aes(x=statistic, xmin=conf.low, xmax=conf.high, y=materia)) +
+  geom_errorbar(width=.15) +
+  geom_point(size=4, color='orange', alpha=.8) +
+  labs(x='\nÍndice de Correlação de Pearson entre\nCurso de Computação com Matérias', y='Matérias\n') +
+  theme(text=element_text(size=16)) +
+  geom_vline(xintercept=0) +
+  scale_y_discrete(labels=c('Matemática', 'Expressão\nVerbal'))
+```
+
+Amostrando a dispersão de cada uma das Matérias no Gráfico 1.3, para ambas as dispersões é perceptível uma relação linear positiva apesar da presença de alguns outliers. Para o cálculo do coeficiente da relação entre os valores, foi utilizado o coeficiente de Pearson, devida a relação linear de forma evidente a partir das amostragens. Em (a) tem-se o valor de 0,64 de correlação para Expressão Verbal, enquanto em (b) nota-se a correlação de 0,69 para Matemática, que em termos gerais, pode-se dizer que há uma relação maior entre a disciplina com o curso de Computação do que Expressão Verbal, apesar de ambas possuírem valores próximos.
+
+No Gráfico 1.4 são apresentados os Índices de Confiança da Correlação de Pearson entre cada Matéria com o Curso de Computação, sendo ambos de 95% de confiança. Expressão Verbal obteve o índice com o menor valor de correlação, podendo apresentar valores entre 0,50 e 0,73 , enquanto os valores de Matemática podem se apresentar entre 0,57 e 0,77. Para ambas as matérias é possível observar correlações de moderadas para fortes, já que o menor valor é 0,50, enquanto o maior é 0,77, se for considerado a partir de 0,50 como moderada e de 0,70 como forte.
+
+**2- Como se comparam entre si as correlações dos dois critérios do SAT com o desempenho nas matérias de Computação? Um dos critérios é claramente mais correlacionado com o desempenho nas matérias de computação que o outro? Os resultados apontam que essa diferença é grande? Pequena?**
+
+```{r}
+diferenca_correlacao <- function(dataset, indices, col1, col2, col3) {
+  agrup = dataset %>%
+    slice(indices)
+  
+  a = cor(agrup[[col1]], agrup[[col2]], method='pearson')
+  b = cor(agrup[[col1]], agrup[[col3]], method='pearson')
+  a-b
+}
+```
+
+```{r}
+q1_boot_comp_dif_cor = ic(q1_dados, "comp_GPA", "math_SAT", "verb_SAT", diferenca_correlacao)
+
+q1_boot_comp_dif_cor
+```
+
+```{r fig.cap="Gráfico 1.5: Diferença do Coeficiente de Correlação de Pearson das matérias de Matemática e Expressão com o curso de Computação."}
+q1_boot_comp_dif_cor %>% 
+  ggplot(aes(x=statistic, xmin=conf.low, xmax=conf.high, y=materia)) +
+  geom_errorbar(width=.08) +
+  geom_point(size=4, color='orange', alpha=.8) +
+  labs(x='\nDiferença da Correlação de Pearson de Matemática', y='Expressão Verbal\n') +
+  theme(text=element_text(size=16)) +
+  geom_vline(xintercept=0) +
+  scale_y_discrete(labels=c('')) +
+  scale_x_continuous(limits=c(-0.025,1))
+```
+
+No Gráfico 1.5 tem-se o cálculo da diferença do coeficiente das correlações de Pearson das matérias com o curso de Computação, ou seja, foi calculado o coeficiente entre Expressão Verbal e o Curso de Computação, em que seu valor foi subtraído do coeficiente calculado para Matemática e o Curso. O Intervalo de Confiança da diferença se mostrou entre -0.02 e 0.13, mostrando que o efeito de uma matéria sobre a outra é pequeno, pondendo até haver efeito quase nulo dependo das amostras, ou seja, ambas as matérias possuem efeitos semelhantes quando analisadas para o curso de Computação.
+
+## Um Experimento com Sorrisos
+
+Neste cenário, estamos estudando dados sobre como ver uma pessoa sorrindo muda o julgamento que temos dela. Os dados são de um experimento que mostrava para uma amostra de participantes 1 de quatro fotos, 3 das quais tem um sorriso e uma que não tem.
+
+Essa foto era acompanhada de um texto que descrevia que a pessoa na foto era suspeita de ter plagiado um trabalho na universidade. Depois de ver a foto, as pessoa devem responder o quanto suspeitam ou não da pessoa retratada. O valor da coluna leniency é um índice feito de respostas para 5 perguntas em uma escala de 0 a 9. Ela mede o quão leniente foi o julgamento das pessoas. Repare que se apenas um sorriso causar alguma mudança, isso é impressionante. Por isso uma diferença de meio ponto já é considerada relevante.
+
+(O estudo completo é esse, caso você tenha interesse: LaFrance, M., & Hecht, M. A. (1995) Why smiles generate leniency. Personality and Social Psychology Bulletin, 21, 207-214.)
+
+### Carregamento e Análise Exploratória dos Dados
+
+```{r}
+q2_dados = read_csv(here::here("data/leniency.csv"), 
+                 col_types = "cdc")
+```
+
+```{r fig.cap="Gráfico 2.1: Valores de Leniência para cada tipo de foto com e sem sorriso, sendo (a) um Boxplot dos valores e suas Dispersões e (b) a Densidade dos valores de Leniência."}
+boxplot = q2_dados %>% 
+  ggplot(aes(leniency, smile)) +
+  geom_jitter(aes(color=smile), height=.1, size=3, alpha=.6) +
+  geom_boxplot(alpha=0, coef=100) +
+  scale_x_continuous(breaks=seq(2,9)) +
+  labs(x='', y='Sorrisos\n', color='Sorrisos', subtitle='(a)') +
+  theme(text=element_text(size=16))
+
+density = q2_dados %>% 
+  ggplot(aes(leniency)) +
+  geom_density(aes(color=smile), size=1) +
+  labs(x='\nLeniência', y='Densidade\n', color='Sorrisos', subtitle='(b)') +
+  theme(text=element_text(size=16)) +
+  scale_x_continuous(breaks=seq(2,9))
+
+grid.arrange(boxplot, density, ncol=1)
+```
+
+```{r}
+q2_dados %>% 
+  group_by(smile) %>% 
+  summarise("Média"=round(mean(leniency),2),
+            "Mediana"=median(leniency),
+            "Valor Mínimo"=min(leniency),
+            "Valor Máximo"=max(leniency))
+```
+
+No Gráfico 2.1 os valores de resposta de Leniência são amostrados por meio de (a) boxplots e também da dispersão dos valores, enquanto (b) apresenta a densidade dos valores de Leniência. Através de (a) é possível verificar que os valores se mostraram bem distribuídos entre 2 e 9, para todos os tipos de fotos, sendo assim havendo uma semelhança de valores entre eles. Felt e Miserable Smile se mostraram com valores bem próximos nos sumários, tendo a mesma média (4,91), mediana (4,75) e valor mínimo (2,5), divergindo apenas no valor máximo, 9 e 8 respectivamente. A partir do Gráfico 2.1 (b) é possível perceber que tirando false smile, as demais categorias possuem uma concentração alta entre 2,5 e 6, com caudas longas à direita, já false smile apresentou uma concentração maior de faixa de valores, com uma distribuição bimodal entre 3 e 7 e uma cauda menor à esquerda, envidenciando os outliers.
+
+### Questões
+
+**1- O quanto ter a pessoa sorrindo na foto (independente do sorriso) causa uma mudança no julgamento das pessoas em geral? Quão relevante é essa mudança?**
+
+```{r}
+#CALCULO DE THETA
+theta <- function(dataset, indices, tipo1, tipo2) {
+    agrupado = dataset %>% 
+        slice(indices) %>% 
+        group_by(smile) %>% 
+        summarise(media = mean(leniency))
+    b = agrupado %>% filter(smile == tipo1) %>%
+        pull(media)
+    l = agrupado %>% filter(smile == tipo2) %>%
+        pull(media)
+    b-l
+}
+
+#FUNÇÃO QUE EXECUTA BOOTSTRAP E CALCULA THETA
+ic = function(dados, tipo1, tipo2) {
+    comparacao_dados = dados %>% 
+        filter(smile %in% c(tipo1, tipo2))
+    
+    set.seed(123)
+
+    #GERAÇÃO DO BOOTSTRAP    
+    resultado_bootstrap = boot(data = comparacao_dados,
+           statistic = theta,
+           R = 2000,
+           tipo1=tipo1,
+           tipo2=tipo2) %>%
+    tidy(conf.level = .95,
+         conf.method = "bca",
+         conf.int = TRUE)
+    
+    resultado_bootstrap %>% 
+        mutate(variante_comparada=tipo2)
+}
+```
+
+```{r}
+#CÁLCULO DOS INTERVALOS DE CONFIANÇA
+comparacao_control_sorrisos = bind_rows(ic(q2_dados, "no smile (control)", "miserable smile"),
+                                          ic(q2_dados, "no smile (control)", "felt smile"),
+                                          ic(q2_dados, "no smile (control)", "false smile"))
+
+comparacao_control_sorrisos
+```
+
+```{r fig.cap="Gráfico 2.2: Intervalo de Confiança de 95% comparando a diferença média de valores de Leniência entre uma foto sem sorrisos com fotos com sorrisos diversos."}
+comparacao_control_sorrisos %>% 
+  ggplot(aes(x=statistic, xmin=conf.low, xmax=conf.high, y=variante_comparada)) +
+  geom_errorbar(width=.15) +
+  geom_point(size=4, color='purple', alpha=.8) +
+  labs(x='\nDiferença da Leniência Média de "no smile (control)"', y='Sorrisos\n') +
+  theme(text=element_text(size=16)) +
+  geom_vline(xintercept=0) +
+  geom_vline(xintercept=-.5, lty=2, alpha=.5)
+```
+
+Tendo em vista o Gráfico 2.2, comparando as amostras dos valores médios de leniências das fotos sem sorriso com fotos de sorrisos variados, tem-se intervalos de confiança negativos em todas as opções, mostrando no geral um efeito nulo ou maior de leniência em fotos com sorrisos. False smile obteve a maior diferença, com o intervalo de confiança entre -2,03 e -0,44, seguido de felt smile entre -1,57 e -0,001 (que atinge o valor mais próximo de uma diferença quase nula entre as demais categorias), e miserable smile, entre -1,54 e -0,12. Porém, levando em conta que somente uma diferença abaixo de -0,5 é capaz de ter efeito relevante entre o julgamento das pessoas, não é possível afirmar com exatidão qual o tipo de sorriso que seja relevante de fato para as pessoas, uma vez que se pegarmos um valor qualquer do intervalo de confiança da média das amostras, podem se mostrar acima ou abaixo do limite de relevância, além de apresentar valores quase nulos para o caso de felt smile.
+
+**2- Como se comparam os efeitos dos diferentes sorrisos no julgamento das pessoas?**
+
+```{r}
+#COMPARAÇÃO DE FALSE SMILE
+comparacao_false = bind_rows(ic(q2_dados, "false smile", "felt smile"),
+                             ic(q2_dados, "false smile", "miserable smile"))
+
+comparacao_false
+```
+
+```{r}
+#COMPARAÇÃO DE FELT SMILE
+comparacao_felt = bind_rows(ic(q2_dados, "felt smile", "false smile"),
+                             ic(q2_dados, "felt smile", "miserable smile"))
+
+comparacao_felt
+```
+
+```{r}
+#COMPARAÇÃO DE MISERABLE SMILE
+comparacao_miserable = bind_rows(ic(q2_dados, "miserable smile", "false smile"),
+                             ic(q2_dados, "miserable smile", "felt smile"))
+
+comparacao_miserable
+```
+
+```{r}
+#FUNÇÃO QUE GERA OS GRÁFICOS DE COMPARAÇÃO
+gera_grafico <- function(dataset, cor, legendaX, legendaY, limites, subtitulo) {
+  dataset %>% 
+    ggplot(aes(y=statistic, ymin=conf.low, ymax=conf.high, x=variante_comparada)) +
+    geom_errorbar(width=.15) +
+    geom_point(size=4, color=cor, alpha=.6) +
+    labs(x=legendaX, y=legendaY, subtitle=subtitulo) +
+    theme(text=element_text(size=16)) +
+    geom_hline(yintercept=0) +
+    geom_hline(yintercept=-.5, lty=2, alpha=.5) +
+    geom_hline(yintercept=.5, lty=2, alpha=.5) +
+    scale_x_discrete(labels=wrap_format(10)) +
+    scale_y_continuous(limits=limites, breaks=seq(-1.5,1.5,0.5))
+}
+```
+
+```{r fig.cap="Gráfico 2.3: Intervalos de Confiança de 95% da diferença da Leniência Média dos Sorrisos em fotos, (a) entre false smile com demais, (b) entre felt smile com demais, e (c) miserable smile com demais."}
+limites = c(-1.5,1.5)
+
+false = gera_grafico(comparacao_false, 'red', '', '\nfalse smile', limites, '(a)')
+felt = gera_grafico(comparacao_felt, 'green', '', '\nfelt smile', limites, '(b)')
+miserable = gera_grafico(comparacao_miserable, 'darkblue', '', '\nmiserable smile', limites, '(c)')
+
+grid.arrange(false, felt, miserable,
+             bottom = textGrob("Diferença da Leniência Média dos Sorrisos com Demais",
+                               gp = gpar(fontsize=16)),
+             ncol=3)
+
+```
+
+No Gráfico 2.3 são comparadas as médias de Leniência das amostras de valores de julgamento para fotos com sorrisos.
+
+Em (a), false smile é comparado com os demais sorrisos, com intervalos de -0,46 a 1,28 para felt smile e de -0.33 a 1.21 para miserable smile, mostrando valores tendendo a serem positivos apesar da possibilidade de apresentar valores negativos também, porém os intervalos se mostram tanto acima como abaixo do índice de relevância, sendo 0,5, sendo assim não ser possível definir se o efeito de false smile com relação aos demais sorrisos é relevante ou não.
+
+Em (b) felt smile é posto em evidência, que quando comparado com miserable smile, tem-se um intervalo entre -0.73 e 0.76, mostrando os valores podem ser ou não relevantes, uma vez que pode apresentar valores acima e abaixo de -0,5 e 0,5.
+
+Em (c) miserable smile se torna protagonista apesar de seus valores já serem comparados com os demais sorrisos, evidenciando que não é possível definir se o mesmo tem efeitos relevantes para os demais sorrisos.

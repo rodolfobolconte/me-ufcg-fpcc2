@@ -1,0 +1,4 @@
+"0","rf_ic = ic_acuracia(rf_data_ic, ""Random Forest"")"
+"0","svm_ic = ic_acuracia(svm_data_ic, ""Support Vector Machine"")"
+"0",""
+"0","models_data_ic = bind_rows(rf_ic, svm_ic) ; models_data_ic"

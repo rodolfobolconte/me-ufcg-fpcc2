@@ -1,0 +1,158 @@
+site,country,PDI,IDV,MAS,UAI,usuarios,responderam_prop,perguntaram_prop,editaram_prop,comentaram_prop,GNI,Internet,EPI,geo,four_regions,eight_regions,six_regions,Latitude,Longitude,World bank income group 2017
+StackOverflow,Egypt,70,25,45,80,1965,0.443256997,0.518575064,0.074300254,0.186259542,3000,95,42.13,egy,africa,africa_north,middle_east_north_africa,27,30,Lower middle income
+StackOverflow,Morocco,70,25,53,68,547,0.444241316,0.49725777,0.071297989,0.166361974,2950,53,42.43,mar,africa,africa_north,middle_east_north_africa,32,-6,Lower middle income
+SuperUser,Egypt,70,25,45,80,333,0.159159159,0.222222222,0.009009009,0.165165165,3000,95,42.13,egy,africa,africa_north,middle_east_north_africa,27,30,Lower middle income
+SuperUser,Morocco,70,25,53,68,75,0.173333333,0.266666667,0.013333333,0.16,2950,53,42.43,mar,africa,africa_north,middle_east_north_africa,32,-6,Lower middle income
+StackOverflow,Ethiopia,70,20,65,55,129,0.333333333,0.410852713,0.062015504,0.100775194,410,1.1,NA,eth,africa,africa_sub_saharan,sub_saharan_africa,9,39.5,Low income
+StackOverflow,Ghana,80,15,40,65,208,0.346153846,0.389423077,0.033653846,0.086538462,1550,14.1,NA,gha,africa,africa_sub_saharan,sub_saharan_africa,8.1,-1.2,Lower middle income
+StackOverflow,Nigeria,80,30,60,55,705,0.417021277,0.478014184,0.045390071,0.123404255,1430,28.4,NA,nga,africa,africa_sub_saharan,sub_saharan_africa,10,8,Lower middle income
+StackOverflow,Sierra Leone,70,20,40,50,4,0.5,0.5,0,0.25,580,0.9,NA,sle,africa,africa_sub_saharan,sub_saharan_africa,8.5,-11.5,Low income
+StackOverflow,South Africa,49,65,63,49,3726,0.526570048,0.586956522,0.108964037,0.2431562,7610,34,NA,zaf,africa,africa_sub_saharan,sub_saharan_africa,-29,24,Upper middle income
+StackOverflow,Tanzania,70,25,40,50,93,0.322580645,0.462365591,0.043010753,0.096774194,570,12,NA,tza,africa,africa_sub_saharan,sub_saharan_africa,-6,35,Low income
+StackOverflow,Zambia,60,35,40,50,47,0.212765957,0.446808511,0.021276596,0.021276596,1350,11.5,NA,zmb,africa,africa_sub_saharan,sub_saharan_africa,-14.33333,28.5,Lower middle income
+SuperUser,Ethiopia,70,20,65,55,21,0.19047619,0.476190476,0,0.142857143,410,1.1,NA,eth,africa,africa_sub_saharan,sub_saharan_africa,9,39.5,Low income
+SuperUser,Ghana,80,15,40,65,21,0.19047619,0.285714286,0.047619048,0.19047619,1550,14.1,NA,gha,africa,africa_sub_saharan,sub_saharan_africa,8.1,-1.2,Lower middle income
+SuperUser,Nigeria,80,30,60,55,83,0.180722892,0.373493976,0.036144578,0.204819277,1430,28.4,NA,nga,africa,africa_sub_saharan,sub_saharan_africa,10,8,Lower middle income
+SuperUser,South Africa,49,65,63,49,782,0.310741688,0.323529412,0.051150895,0.28516624,7610,34,NA,zaf,africa,africa_sub_saharan,sub_saharan_africa,-29,24,Upper middle income
+SuperUser,Tanzania,70,25,40,50,13,0.230769231,0.307692308,0,0.461538462,570,12,NA,tza,africa,africa_sub_saharan,sub_saharan_africa,-6,35,Low income
+SuperUser,Zambia,60,35,40,50,7,0.285714286,0.285714286,0.142857143,0.285714286,1350,11.5,NA,zmb,africa,africa_sub_saharan,sub_saharan_africa,-14.33333,28.5,Lower middle income
+StackOverflow,Canada,39,80,52,48,17591,0.601500767,0.598772099,0.134727986,0.328406572,50970,83,NA,can,americas,america_north,america,60.10867,-113.64258,High income
+StackOverflow,Costa Rica,35,15,21,86,431,0.487238979,0.489559165,0.05800464,0.201856148,8740,42.1,48.53,cri,americas,america_north,america,10,-84,Upper middle income
+StackOverflow,El Salvador,66,19,40,94,133,0.473684211,0.496240602,0.052631579,0.135338346,3580,18.9,43.46,slv,americas,america_north,america,13.83333,-88.91667,Lower middle income
+StackOverflow,Guatemala,95,6,37,101,215,0.51627907,0.446511628,0.055813953,0.172093023,3140,12.3,45.77,gtm,americas,america_north,america,14.64072,-90.51327,Lower middle income
+StackOverflow,Jamaica,45,39,68,13,109,0.394495413,0.541284404,0.064220183,0.137614679,5140,37.5,NA,jam,americas,america_north,america,18.16667,-77.25,Upper middle income
+StackOverflow,Mexico,81,30,69,82,2973,0.473595695,0.454086781,0.06390851,0.182980155,9600,35,49.83,mex,americas,america_north,america,19.42847,-99.12766,Upper middle income
+StackOverflow,Panama,95,11,44,86,116,0.474137931,0.50862069,0.017241379,0.146551724,9850,42.7,43.7,pan,americas,america_north,america,8.9936,-79.51973,Upper middle income
+StackOverflow,United States,40,91,62,46,130197,0.588884537,0.577578592,0.132261112,0.319999693,50120,77.9,NA,usa,americas,america_north,america,39.76,-98.5,High income
+SuperUser,Canada,39,80,52,48,4657,0.311573975,0.319519004,0.05024694,0.312432897,50970,83,NA,can,americas,america_north,america,60.10867,-113.64258,High income
+SuperUser,Costa Rica,35,15,21,86,51,0.156862745,0.254901961,0.039215686,0.254901961,8740,42.1,48.53,cri,americas,america_north,america,10,-84,Upper middle income
+SuperUser,El Salvador,66,19,40,94,23,0.304347826,0.130434783,0,0.217391304,3580,18.9,43.46,slv,americas,america_north,america,13.83333,-88.91667,Lower middle income
+SuperUser,Guatemala,95,6,37,101,38,0.263157895,0.263157895,0,0.157894737,3140,12.3,45.77,gtm,americas,america_north,america,14.64072,-90.51327,Lower middle income
+SuperUser,Jamaica,45,39,68,13,13,0.230769231,0.538461538,0,0.461538462,5140,37.5,NA,jam,americas,america_north,america,18.16667,-77.25,Upper middle income
+SuperUser,Mexico,81,30,69,82,495,0.236363636,0.250505051,0.028282828,0.214141414,9600,35,49.83,mex,americas,america_north,america,19.42847,-99.12766,Upper middle income
+SuperUser,Panama,95,11,44,86,18,0.277777778,0.166666667,0,0.055555556,9850,42.7,43.7,pan,americas,america_north,america,8.9936,-79.51973,Upper middle income
+SuperUser,United States,40,91,62,46,34219,0.303574038,0.304070838,0.045647155,0.305736579,50120,77.9,NA,usa,americas,america_north,america,39.76,-98.5,High income
+StackOverflow,Argentina,49,46,56,86,2798,0.535739814,0.52108649,0.092566119,0.253395282,NA,51,59.02,arg,americas,america_south,america,-34,-64,Upper middle income
+StackOverflow,Brazil,69,38,49,76,10717,0.482691052,0.465801997,0.083512177,0.203881683,11630,45,49.96,bra,americas,america_south,america,-10,-55,Upper middle income
+StackOverflow,Chile,63,23,28,86,1075,0.48372093,0.484651163,0.07627907,0.210232558,14280,52.3,48.75,chl,americas,america_south,america,-33.45694,-70.64827,High income
+StackOverflow,Colombia,67,13,64,80,1224,0.477941176,0.496732026,0.059640523,0.171568627,6990,40.4,48.54,col,americas,america_south,america,4,-73.25,Upper middle income
+StackOverflow,Ecuador,78,8,63,67,278,0.449640288,0.446043165,0.039568345,0.161870504,5200,31.4,51.05,ecu,americas,america_south,america,-1.25,-78.25,Upper middle income
+StackOverflow,Peru,64,16,42,87,534,0.47752809,0.468164794,0.093632959,0.228464419,5880,36,51.46,per,americas,america_south,america,-10,-75.25,Upper middle income
+StackOverflow,Uruguay,61,36,38,100,569,0.567662566,0.518453427,0.101933216,0.261862917,13510,51.4,49.61,ury,americas,america_south,america,-33,-56,High income
+StackOverflow,Venezuela,81,12,73,76,686,0.45335277,0.516034985,0.078717201,0.196793003,12500,NA,46.12,ven,americas,america_south,america,8,-66,Upper middle income
+SuperUser,Argentina,49,46,56,86,561,0.245989305,0.267379679,0.033868093,0.229946524,NA,51,59.02,arg,americas,america_south,america,-34,-64,Upper middle income
+SuperUser,Brazil,69,38,49,76,2017,0.195339613,0.218145761,0.025285077,0.197322757,11630,45,49.96,bra,americas,america_south,america,-10,-55,Upper middle income
+SuperUser,Chile,63,23,28,86,214,0.252336449,0.257009346,0.042056075,0.23364486,14280,52.3,48.75,chl,americas,america_south,america,-33.45694,-70.64827,High income
+SuperUser,Colombia,67,13,64,80,219,0.136986301,0.223744292,0.02739726,0.196347032,6990,40.4,48.54,col,americas,america_south,america,4,-73.25,Upper middle income
+SuperUser,Ecuador,78,8,63,67,38,0.210526316,0.157894737,0.026315789,0.263157895,5200,31.4,51.05,ecu,americas,america_south,america,-1.25,-78.25,Upper middle income
+SuperUser,Peru,64,16,42,87,101,0.267326733,0.267326733,0.059405941,0.247524752,5880,36,51.46,per,americas,america_south,america,-10,-75.25,Upper middle income
+SuperUser,Uruguay,61,36,38,100,119,0.268907563,0.302521008,0.008403361,0.243697479,13510,51.4,49.61,ury,americas,america_south,america,-33,-56,High income
+SuperUser,Venezuela,81,12,73,76,113,0.274336283,0.300884956,0.008849558,0.212389381,12500,NA,46.12,ven,americas,america_south,america,8,-66,Upper middle income
+StackOverflow,Bangladesh,80,20,55,60,2558,0.392885066,0.475762314,0.080531665,0.159890539,840,5,NA,bgd,asia,asia_west,south_asia,24,90,Lower middle income
+StackOverflow,India,77,48,56,40,70970,0.455826406,0.581442863,0.094744258,0.202296745,1530,10.1,53.54,ind,asia,asia_west,south_asia,22,79,Lower middle income
+StackOverflow,Iran,58,41,43,59,3155,0.469413629,0.557210777,0.111251981,0.209508716,NA,100,41.83,irn,asia,asia_west,middle_east_north_africa,32,53,Upper middle income
+StackOverflow,Iraq,95,30,70,85,144,0.291666667,0.430555556,0.041666667,0.0625,5870,5,38.02,irq,asia,asia_west,middle_east_north_africa,33,44,Upper middle income
+StackOverflow,Israel,13,54,47,81,2963,0.673641579,0.690516369,0.183935201,0.41680729,28380,68.9,NA,isr,asia,asia_west,middle_east_north_africa,31.5,34.75,High income
+StackOverflow,Kuwait,90,25,40,80,168,0.410714286,0.595238095,0.077380952,0.18452381,44100,74.2,41.8,kwt,asia,asia_west,middle_east_north_africa,29.36972,47.97833,High income
+StackOverflow,Lebanon,75,40,65,50,401,0.551122195,0.665835411,0.119700748,0.296758105,9190,52,NA,lbn,asia,asia_west,middle_east_north_africa,33.83333,35.83333,Upper middle income
+StackOverflow,Pakistan,55,14,50,70,4809,0.474318985,0.608026617,0.101268455,0.213557912,1260,9,NA,pak,asia,asia_west,south_asia,30,70,Lower middle income
+StackOverflow,Saudi Arabia,95,25,60,80,328,0.411585366,0.5,0.067073171,0.155487805,21210,47.5,39.48,sau,asia,asia_west,middle_east_north_africa,25,45,High income
+SuperUser,Bangladesh,80,20,55,60,363,0.121212121,0.220385675,0.024793388,0.154269972,840,5,NA,bgd,asia,asia_west,south_asia,24,90,Lower middle income
+SuperUser,India,77,48,56,40,8921,0.183051227,0.283040018,0.027911669,0.199192916,1530,10.1,53.54,ind,asia,asia_west,south_asia,22,79,Lower middle income
+SuperUser,Iran,58,41,43,59,692,0.203757225,0.332369942,0.031791908,0.24132948,NA,100,41.83,irn,asia,asia_west,middle_east_north_africa,32,53,Upper middle income
+SuperUser,Iraq,95,30,70,85,15,0.2,0.4,0,0.133333333,5870,5,38.02,irq,asia,asia_west,middle_east_north_africa,33,44,Upper middle income
+SuperUser,Israel,13,54,47,81,852,0.267605634,0.373239437,0.034037559,0.343896714,28380,68.9,NA,isr,asia,asia_west,middle_east_north_africa,31.5,34.75,High income
+SuperUser,Kuwait,90,25,40,80,23,0.304347826,0.304347826,0.086956522,0.304347826,44100,74.2,41.8,kwt,asia,asia_west,middle_east_north_africa,29.36972,47.97833,High income
+SuperUser,Lebanon,75,40,65,50,70,0.171428571,0.328571429,0.014285714,0.314285714,9190,52,NA,lbn,asia,asia_west,middle_east_north_africa,33.83333,35.83333,Upper middle income
+SuperUser,Pakistan,55,14,50,70,630,0.180952381,0.292063492,0.020634921,0.187301587,1260,9,NA,pak,asia,asia_west,south_asia,30,70,Lower middle income
+SuperUser,Saudi Arabia,95,25,60,80,45,0.266666667,0.333333333,0.044444444,0.222222222,21210,47.5,39.48,sau,asia,asia_west,middle_east_north_africa,25,45,High income
+StackOverflow,Australia,36,90,61,51,12313,0.613335499,0.589783156,0.146999107,0.333955981,59570,79.5,NA,aus,asia,east_asia_pacific,east_asia_pacific,-25,135,High income
+StackOverflow,China,80,20,66,30,13401,0.355719722,0.363107231,0.029773897,0.107827774,5680,38.3,50.15,chn,asia,east_asia_pacific,east_asia_pacific,35,105,Upper middle income
+StackOverflow,Indonesia,78,14,46,48,3585,0.321059972,0.421478382,0.035983264,0.110739191,3420,12.3,52.74,idn,asia,east_asia_pacific,east_asia_pacific,-5,120,Lower middle income
+StackOverflow,Japan,54,46,95,92,2692,0.448736999,0.428306092,0.086181278,0.192421991,47870,79.1,52.88,jpn,asia,east_asia_pacific,east_asia_pacific,35.68536,139.75309,High income
+StackOverflow,Malaysia,104,26,50,36,1554,0.405405405,0.562419562,0.073359073,0.187902188,9800,61,59.73,mys,asia,east_asia_pacific,east_asia_pacific,2.5,112.5,Upper middle income
+StackOverflow,New Zealand,22,79,58,49,2883,0.618106139,0.626430801,0.156087409,0.348942074,30620,86,NA,nzl,asia,east_asia_pacific,east_asia_pacific,-42,174,High income
+StackOverflow,Philippines,94,32,64,44,2860,0.432517483,0.574125874,0.077972028,0.198951049,2470,29,NA,phl,asia,east_asia_pacific,east_asia_pacific,13,122,Lower middle income
+StackOverflow,Singapore,74,20,48,8,2270,0.522907489,0.601321586,0.101321586,0.276651982,47210,71,59.58,sgp,asia,east_asia_pacific,east_asia_pacific,1.28967,103.85007,High income
+StackOverflow,South Korea,60,18,39,85,1784,0.319506726,0.406950673,0.041479821,0.106502242,22670,83.8,53.62,kor,asia,east_asia_pacific,east_asia_pacific,36.5,127.75,High income
+StackOverflow,Taiwan,58,17,45,69,1341,0.398210291,0.39448173,0.043997017,0.158090977,NA,NA,52.56,twn,asia,east_asia_pacific,east_asia_pacific,24,121,High income
+StackOverflow,Thailand,64,20,34,64,1152,0.388888889,0.410590278,0.058159722,0.170138889,5210,23.7,47.79,tha,asia,east_asia_pacific,east_asia_pacific,15.5,101,Upper middle income
+StackOverflow,Vietnam,70,20,40,30,2319,0.370418284,0.421302285,0.037516171,0.128503665,1400,35.1,51.57,vnm,asia,east_asia_pacific,east_asia_pacific,16.16667,107.83333,Lower middle income
+SuperUser,Australia,36,90,61,51,3297,0.326963907,0.311191993,0.046405823,0.314225053,59570,79.5,NA,aus,asia,east_asia_pacific,east_asia_pacific,-25,135,High income
+SuperUser,China,80,20,66,30,1359,0.178807947,0.231052244,0.018395879,0.164091244,5680,38.3,50.15,chn,asia,east_asia_pacific,east_asia_pacific,35,105,Upper middle income
+SuperUser,Hong Kong,68,25,57,29,232,0.275862069,0.344827586,0.060344828,0.306034483,36560,72.2,52.5,NA,asia,east_asia_pacific,east_asia_pacific,NA,NA,NA
+SuperUser,Indonesia,78,14,46,48,374,0.213903743,0.280748663,0.016042781,0.235294118,3420,12.3,52.74,idn,asia,east_asia_pacific,east_asia_pacific,-5,120,Lower middle income
+SuperUser,Japan,54,46,95,92,483,0.209109731,0.231884058,0.01863354,0.221532091,47870,79.1,52.88,jpn,asia,east_asia_pacific,east_asia_pacific,35.68536,139.75309,High income
+SuperUser,Malaysia,104,26,50,36,271,0.20295203,0.273062731,0.007380074,0.232472325,9800,61,59.73,mys,asia,east_asia_pacific,east_asia_pacific,2.5,112.5,Upper middle income
+SuperUser,New Zealand,22,79,58,49,743,0.34320323,0.34589502,0.048452221,0.3512786,30620,86,NA,nzl,asia,east_asia_pacific,east_asia_pacific,-42,174,High income
+SuperUser,Philippines,94,32,64,44,393,0.213740458,0.366412214,0.022900763,0.287531807,2470,29,NA,phl,asia,east_asia_pacific,east_asia_pacific,13,122,Lower middle income
+SuperUser,Singapore,74,20,48,8,448,0.263392857,0.299107143,0.033482143,0.265625,47210,71,59.58,sgp,asia,east_asia_pacific,east_asia_pacific,1.28967,103.85007,High income
+SuperUser,South Korea,60,18,39,85,195,0.143589744,0.235897436,0.015384615,0.18974359,22670,83.8,53.62,kor,asia,east_asia_pacific,east_asia_pacific,36.5,127.75,High income
+SuperUser,Taiwan,58,17,45,69,225,0.151111111,0.151111111,0.008888889,0.137777778,NA,NA,52.56,twn,asia,east_asia_pacific,east_asia_pacific,24,121,High income
+SuperUser,Thailand,64,20,34,64,201,0.258706468,0.263681592,0.019900498,0.223880597,5210,23.7,47.79,tha,asia,east_asia_pacific,east_asia_pacific,15.5,101,Upper middle income
+SuperUser,Vietnam,70,20,40,30,254,0.169291339,0.244094488,0.027559055,0.192913386,1400,35.1,51.57,vnm,asia,east_asia_pacific,east_asia_pacific,16.16667,107.83333,Lower middle income
+StackOverflow,Bulgaria,70,30,40,85,1463,0.568010936,0.514012303,0.114832536,0.286397813,6870,51,NA,bgr,europe,europe_east,europe_central_asia,42.66667,25.25,Upper middle income
+StackOverflow,Croatia,73,33,40,80,1069,0.545369504,0.536950421,0.108512629,0.285313377,13290,59.6,NA,hrv,europe,europe_east,europe_central_asia,45.16667,15.5,Upper middle income
+StackOverflow,Czech Republic,57,58,57,74,2701,0.574601999,0.542391707,0.117734173,0.299518697,18130,73,57.42,cze,europe,europe_east,europe_central_asia,49.75,15,High income
+StackOverflow,Estonia,40,60,30,60,621,0.595813205,0.581320451,0.141706924,0.322061192,15830,76.5,61.39,est,europe,europe_east,europe_central_asia,59,26,High income
+StackOverflow,Finland,33,63,26,59,2046,0.585043988,0.489247312,0.129521017,0.31427175,46940,89.4,64.4,fin,europe,europe_east,europe_central_asia,64,26,High income
+StackOverflow,Hungary,46,80,88,82,1842,0.560260586,0.508686211,0.116720955,0.292073833,12370,70,58.55,hun,europe,europe_east,europe_central_asia,47,20,High income
+StackOverflow,Latvia,44,70,40,63,673,0.569093611,0.557206538,0.108469539,0.320950966,14200,71.7,59.43,lva,europe,europe_east,europe_central_asia,57,25,High income
+StackOverflow,Lithuania,42,60,40,63,850,0.601176471,0.569411765,0.127058824,0.297647059,13920,65.1,NA,ltu,europe,europe_east,europe_central_asia,55.41667,24,High income
+StackOverflow,Romania,90,30,42,90,3570,0.564145658,0.578431373,0.113445378,0.289915966,8150,44,58.63,rou,europe,europe_east,europe_central_asia,46,25,Upper middle income
+StackOverflow,Russia,93,39,36,95,10701,0.517615176,0.485842445,0.083263246,0.240538267,12700,49,50.44,rus,europe,europe_east,europe_central_asia,60,100,Upper middle income
+StackOverflow,Serbia,86,25,43,92,1294,0.519319938,0.523956723,0.083462133,0.247295209,5280,42.2,NA,srb,europe,europe_east,europe_central_asia,44.81892,20.45998,Upper middle income
+StackOverflow,Slovenia,71,27,19,88,692,0.612716763,0.628612717,0.111271676,0.333815029,22810,69,60.6,svn,europe,europe_east,europe_central_asia,46.08333,15,High income
+StackOverflow,Turkey,66,37,45,85,4506,0.467598757,0.505326232,0.088104749,0.218153573,10830,43.1,47.8,tur,europe,europe_east,europe_central_asia,39,35,Upper middle income
+SuperUser,Bulgaria,70,30,40,85,335,0.247761194,0.247761194,0.020895522,0.214925373,6870,51,NA,bgr,europe,europe_east,europe_central_asia,42.66667,25.25,Upper middle income
+SuperUser,Croatia,73,33,40,80,230,0.3,0.317391304,0.039130435,0.247826087,13290,59.6,NA,hrv,europe,europe_east,europe_central_asia,45.16667,15.5,Upper middle income
+SuperUser,Czech Republic,57,58,57,74,698,0.257879656,0.282234957,0.031518625,0.256446991,18130,73,57.42,cze,europe,europe_east,europe_central_asia,49.75,15,High income
+SuperUser,Estonia,40,60,30,60,174,0.350574713,0.287356322,0.051724138,0.25862069,15830,76.5,61.39,est,europe,europe_east,europe_central_asia,59,26,High income
+SuperUser,Finland,33,63,26,59,577,0.346620451,0.305025997,0.055459272,0.332755633,46940,89.4,64.4,fin,europe,europe_east,europe_central_asia,64,26,High income
+SuperUser,Hungary,46,80,88,82,447,0.315436242,0.333333333,0.035794183,0.317673378,12370,70,58.55,hun,europe,europe_east,europe_central_asia,47,20,High income
+SuperUser,Latvia,44,70,40,63,176,0.232954545,0.335227273,0.022727273,0.284090909,14200,71.7,59.43,lva,europe,europe_east,europe_central_asia,57,25,High income
+SuperUser,Lithuania,42,60,40,63,207,0.222222222,0.260869565,0.028985507,0.222222222,13920,65.1,NA,ltu,europe,europe_east,europe_central_asia,55.41667,24,High income
+SuperUser,Romania,90,30,42,90,793,0.229508197,0.290037831,0.030264817,0.25851198,8150,44,58.63,rou,europe,europe_east,europe_central_asia,46,25,Upper middle income
+SuperUser,Russia,93,39,36,95,1900,0.208947368,0.243157895,0.026315789,0.195263158,12700,49,50.44,rus,europe,europe_east,europe_central_asia,60,100,Upper middle income
+SuperUser,Serbia,86,25,43,92,266,0.248120301,0.281954887,0.041353383,0.244360902,5280,42.2,NA,srb,europe,europe_east,europe_central_asia,44.81892,20.45998,Upper middle income
+SuperUser,Slovenia,71,27,19,88,187,0.262032086,0.320855615,0.042780749,0.28342246,22810,69,60.6,svn,europe,europe_east,europe_central_asia,46.08333,15,High income
+SuperUser,Turkey,66,37,45,85,791,0.188369153,0.255372946,0.02528445,0.217446271,10830,43.1,47.8,tur,europe,europe_east,europe_central_asia,39,35,Upper middle income
+StackOverflow,Austria,11,55,79,70,2518,0.631056394,0.593328038,0.149324861,0.350277998,48160,79.8,63.21,aut,europe,europe_west,europe_central_asia,47.33333,13.33333,High income
+StackOverflow,Belgium,65,75,54,94,4275,0.608187135,0.608888889,0.146666667,0.320233918,44990,78,61.21,bel,europe,europe_west,europe_central_asia,50.75,4.5,High income
+StackOverflow,Denmark,18,74,16,23,4029,0.556713825,0.621245967,0.115909655,0.289401837,59770,90,69.3,dnk,europe,europe_west,europe_central_asia,56,10,High income
+StackOverflow,France,68,71,43,86,11450,0.591004367,0.550305677,0.131528384,0.292838428,41750,79.6,52.69,fra,europe,europe_west,europe_central_asia,46,2,High income
+StackOverflow,Germany,35,67,66,65,18374,0.616414499,0.597637967,0.160988353,0.343583324,44010,83,60.89,deu,europe,europe_west,europe_central_asia,51.5,10.5,High income
+StackOverflow,Greece,60,35,57,112,2068,0.512088975,0.550290135,0.106382979,0.252901354,23260,53,NA,grc,europe,europe_west,europe_central_asia,39,22,High income
+StackOverflow,Ireland,28,70,68,35,2884,0.556518724,0.612690707,0.120319001,0.285020804,38970,76.8,NA,irl,europe,europe_west,europe_central_asia,53,-8,High income
+StackOverflow,Italy,50,76,70,75,6822,0.529170331,0.589123424,0.105834066,0.255496922,33840,56.8,52.8,ita,europe,europe_west,europe_central_asia,42.83333,12.83333,High income
+StackOverflow,Luxembourg,40,60,50,70,180,0.533333333,0.511111111,0.127777778,0.272222222,76960,90.9,NA,lux,europe,europe_west,europe_central_asia,49.61167,6.13,High income
+StackOverflow,Malta,56,59,47,96,255,0.568627451,0.725490196,0.109803922,0.305882353,19760,69.2,NA,mlt,europe,europe_west,europe_central_asia,35.91667,14.43333,High income
+StackOverflow,Netherlands,38,80,14,53,9298,0.616799312,0.59539686,0.149709615,0.328027533,48250,92.3,68.99,nld,europe,europe_west,europe_central_asia,52.25,5.75,High income
+StackOverflow,Norway,31,69,8,50,3128,0.599744246,0.588235294,0.124680307,0.341112532,98860,94,64.33,nor,europe,europe_west,europe_central_asia,62,10,High income
+StackOverflow,Poland,68,60,64,93,6069,0.58329214,0.567144505,0.126379964,0.311253913,12660,64.9,64.26,pol,europe,europe_west,europe_central_asia,52,20,High income
+StackOverflow,Portugal,63,27,31,104,2851,0.525780428,0.576289021,0.106278499,0.248333918,20580,57.8,56.83,prt,europe,europe_west,europe_central_asia,39.6945,-8.13057,High income
+StackOverflow,Spain,57,51,42,86,7349,0.526330113,0.503333787,0.092801742,0.23458974,30110,67.6,57.18,esp,europe,europe_west,europe_central_asia,40,-4,High income
+StackOverflow,Sweden,31,71,5,29,6980,0.601289398,0.593839542,0.138968481,0.334527221,56210,94,67.8,swe,europe,europe_west,europe_central_asia,62,15,High income
+StackOverflow,Switzerland,34,68,70,58,3623,0.635109026,0.602815346,0.16864477,0.359922716,82730,85.2,58.29,che,europe,europe_west,europe_central_asia,47.00016,8.01427,High income
+StackOverflow,United Kingdom,35,89,66,35,35303,0.60377305,0.631447752,0.15143189,0.334844064,38250,86.8,NA,gbr,europe,europe_west,europe_central_asia,54.75844,-2.69531,High income
+SuperUser,Austria,11,55,79,70,667,0.274362819,0.269865067,0.047976012,0.27886057,48160,79.8,63.21,aut,europe,europe_west,europe_central_asia,47.33333,13.33333,High income
+SuperUser,Belgium,65,75,54,94,1100,0.300909091,0.322727273,0.048181818,0.285454545,44990,78,61.21,bel,europe,europe_west,europe_central_asia,50.75,4.5,High income
+SuperUser,Denmark,18,74,16,23,932,0.275751073,0.320815451,0.040772532,0.306866953,59770,90,69.3,dnk,europe,europe_west,europe_central_asia,56,10,High income
+SuperUser,France,68,71,43,86,2440,0.278278689,0.233196721,0.041803279,0.244262295,41750,79.6,52.69,fra,europe,europe_west,europe_central_asia,46,2,High income
+SuperUser,Germany,35,67,66,65,4600,0.30326087,0.302608696,0.05,0.307173913,44010,83,60.89,deu,europe,europe_west,europe_central_asia,51.5,10.5,High income
+SuperUser,Greece,60,35,57,112,463,0.252699784,0.291576674,0.036717063,0.259179266,23260,53,NA,grc,europe,europe_west,europe_central_asia,39,22,High income
+SuperUser,Ireland,28,70,68,35,659,0.298937785,0.303490137,0.033383915,0.297420334,38970,76.8,NA,irl,europe,europe_west,europe_central_asia,53,-8,High income
+SuperUser,Italy,50,76,70,75,1416,0.252118644,0.30720339,0.044491525,0.283898305,33840,56.8,52.8,ita,europe,europe_west,europe_central_asia,42.83333,12.83333,High income
+SuperUser,Luxembourg,40,60,50,70,44,0.409090909,0.136363636,0.045454545,0.204545455,76960,90.9,NA,lux,europe,europe_west,europe_central_asia,49.61167,6.13,High income
+SuperUser,Malta,56,59,47,96,49,0.244897959,0.428571429,0.12244898,0.326530612,19760,69.2,NA,mlt,europe,europe_west,europe_central_asia,35.91667,14.43333,High income
+SuperUser,Netherlands,38,80,14,53,2220,0.276126126,0.281081081,0.04954955,0.278378378,48250,92.3,68.99,nld,europe,europe_west,europe_central_asia,52.25,5.75,High income
+SuperUser,Norway,31,69,8,50,834,0.303357314,0.270983213,0.044364508,0.267386091,98860,94,64.33,nor,europe,europe_west,europe_central_asia,62,10,High income
+SuperUser,Poland,68,60,64,93,1443,0.25987526,0.319473319,0.031185031,0.267498267,12660,64.9,64.26,pol,europe,europe_west,europe_central_asia,52,20,High income
+SuperUser,Portugal,63,27,31,104,621,0.246376812,0.275362319,0.027375201,0.23510467,20580,57.8,56.83,prt,europe,europe_west,europe_central_asia,39.6945,-8.13057,High income
+SuperUser,Spain,57,51,42,86,1262,0.245641838,0.205229794,0.022979398,0.204437401,30110,67.6,57.18,esp,europe,europe_west,europe_central_asia,40,-4,High income
+SuperUser,Sweden,31,71,5,29,1861,0.268672757,0.295002687,0.035464804,0.281031703,56210,94,67.8,swe,europe,europe_west,europe_central_asia,62,15,High income
+SuperUser,Switzerland,34,68,70,58,999,0.325325325,0.295295295,0.05005005,0.302302302,82730,85.2,58.29,che,europe,europe_west,europe_central_asia,47.00016,8.01427,High income
+SuperUser,United Kingdom,35,89,66,35,8972,0.31954971,0.336937138,0.048372715,0.33314757,38250,86.8,NA,gbr,europe,europe_west,europe_central_asia,54.75844,-2.69531,High income
+StackOverflow,Hong Kong,68,25,57,29,970,0.509278351,0.541237113,0.093814433,0.267010309,36560,72.2,52.5,NA,asia,east_asia_pacific,east_asia_pacific,NA,NA,NA
+StackOverflow,Slovakia,104,52,110,51,861,0.570267131,0.579558653,0.133565621,0.315911731,17180,74.4,55.96,NA,europe,europe_east,europe_central_asia,NA,NA,NA
+SuperUser,Slovakia,104,52,110,51,190,0.289473684,0.315789474,0.021052632,0.315789474,17180,74.4,55.96,NA,europe,europe_east,europe_central_asia,NA,NA,NA

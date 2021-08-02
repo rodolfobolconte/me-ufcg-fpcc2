@@ -1,0 +1,6 @@
+"0","agrupado = iat %>% "
+"0","    group_by(sex) %>% "
+"0","    summarise(media = mean(d_art), "
+"0","              .groups = ""drop"")"
+"0",""
+"0","agrupado"

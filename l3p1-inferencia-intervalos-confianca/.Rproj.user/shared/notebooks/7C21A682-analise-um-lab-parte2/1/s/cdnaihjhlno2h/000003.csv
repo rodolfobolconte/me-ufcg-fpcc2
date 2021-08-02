@@ -1,0 +1,7 @@
+"0","iat %>%"
+"0","  ggplot(aes(x = d_art, fill = sex, color = sex)) +"
+"0","  geom_histogram(binwidth = .25, alpha = .4, boundary = 0) +"
+"0","  geom_rug() +"
+"0","  facet_grid(sex ~ .) +"
+"0","  labs(title = ""Distribuição de d_art"") + "
+"0","  theme(legend.position = ""None"")"

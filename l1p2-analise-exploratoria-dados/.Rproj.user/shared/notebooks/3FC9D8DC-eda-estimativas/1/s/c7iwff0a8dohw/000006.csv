@@ -1,0 +1,6 @@
+"0","library(tidyverse)"
+"0","library(here)"
+"0","source(here::here(""code/lib.R""))"
+"0","theme_set(theme_bw())"
+"0",""
+"0","tarefas = read_projectdata()"

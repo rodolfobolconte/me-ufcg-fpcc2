@@ -1,0 +1,6 @@
+"0","dados = read_csv(here::here(""data/satisfacoes.csv""), "
+"0","                 col_types = ""idcc"") "
+"0",""
+"0","#TIRANDO USUÁRIO 1 E 24 POR TEREM MENOS DE 5 AVALIAÇÕES E O CENÁRIO LIKE/DESLIKE POIS NÃO É PEDIDO NA QUESTÃO"
+"0","dados = dados %>% filter(user_id!=1 & user_id!=24, "
+"0","                         scenario!='like/dislike')"

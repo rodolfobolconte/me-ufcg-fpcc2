@@ -1,0 +1,3 @@
+"0","q3_modelo = lm(responderam_prop ~ log10(GNI), data=q3_dados) # responderam_prop = b0 + b1 * GNI"
+"0",""
+"0","tidy(q3_modelo)"

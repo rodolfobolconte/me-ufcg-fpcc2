@@ -1,0 +1,8 @@
+"0","junho %>% "
+"0","  filter(cidade!=""Patos"") %>% "
+"0","  ggplot(aes(x=chuva, fill=cidade)) +"
+"0","  geom_density(alpha=0.3) +"
+"0","  ggtitle(""Gráfico 7 - Índice Pluviométrico \nde Junho (2010-2019)"") +"
+"0","  labs(x=""Milímetros (mm)"", y=""Densidade"") +"
+"0","  theme(plot.title=element_text(hjust=0.5)) +"
+"0","  scale_fill_discrete(name=""Cidade"")"

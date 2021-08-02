@@ -1,0 +1,7 @@
+"0","m = agrupado %>% filter(sex == ""m"") %>% pull(media)"
+"0","f = agrupado %>% filter(sex == ""f"") %>% pull(media)"
+"0","m - f"
+"1","[1]"
+"1"," -0.5241867"
+"1","
+"

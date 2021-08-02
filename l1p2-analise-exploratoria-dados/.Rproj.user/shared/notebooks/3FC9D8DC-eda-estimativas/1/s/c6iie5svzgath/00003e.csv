@@ -1,0 +1,8 @@
+"0","tarefas %>% "
+"0","    count(project_code) %>%"
+"0","    ggplot(aes(n, reorder(project_code, -n))) +"
+"0","    geom_col(fill=""lightblue"") +"
+"0","    scale_x_continuous(breaks=seq(0,5000,1000)) + "
+"0","    geom_text(aes(label = n), hjust = 0.5, vjust=0.3, size=3) +"
+"0","    labs(title='Gráfico 2:\nQuantidade de Tarefas por Projeto', x='Quantidade', y='Projetos') +"
+"0","    theme(plot.title=element_text(hjust=0.5))"

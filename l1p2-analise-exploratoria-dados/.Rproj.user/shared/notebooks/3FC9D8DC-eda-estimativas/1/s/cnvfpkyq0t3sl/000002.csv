@@ -1,0 +1,2 @@
+"0","#erro = hours_estimate - hours_actual"
+"0","#erro_absoluto = abs(erro)"

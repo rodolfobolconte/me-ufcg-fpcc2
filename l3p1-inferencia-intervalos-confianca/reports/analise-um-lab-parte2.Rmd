@@ -1,0 +1,181 @@
+---
+title: "Análise de uma replicação"
+output:
+  word_document: default
+  df_print: paged
+  code_folding: hide
+  pdf_document: default
+  html_document: null
+theme: sandstone
+params:
+  arquivo_dados: data/uva.csv
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(broom)
+library(ggbeeswarm)
+library(gridExtra)
+theme_set(theme_bw())
+
+knitr::opts_chunk$set(tidy = FALSE,
+                      fig.width = 6,
+                      fig.height = 5)
+
+```
+
+## Referências para interpretar o IAT
+
+IAT: absolute d of 0.15, 0.35, and 0.65 are considered small, medium, and large level of bias for individual scores. Positive d means bias towards arts / against Math.
+
+## Análise de uma replicação
+
+```{r}
+iat = read_csv(here::here(params$arquivo_dados), col_types = "cccdc")
+iat = iat %>% 
+    mutate(sex = factor(sex, levels = c("m", "f"), ordered = TRUE))
+glimpse(iat)
+iat %>% 
+  count(sex)
+```
+
+```{r}
+iat %>%
+  ggplot(aes(x = d_art, fill = sex, color = sex)) +
+  geom_histogram(binwidth = .25, alpha = .4, boundary = 0) +
+  geom_rug() +
+  facet_grid(sex ~ .) +
+  labs(title = "Distribuição de d_art") + 
+  theme(legend.position = "None")
+```
+
+```{r}
+iat %>% 
+  group_by(sex) %>% 
+  summarise(n=n(), mediana=median(d_art), media=mean(d_art), desvio_padrao=sd(d_art), .groups = "drop")
+```
+
+
+```{r}
+iat %>% 
+    ggplot(aes(x = sex, y = d_art)) + 
+    geom_quasirandom(width = .1)
+```
+
+
+
+```{r}
+iat %>% 
+    ggplot(aes(x = sex, y = d_art)) + 
+    geom_quasirandom(width = .1) + 
+    stat_summary(geom = "point", fun = "mean", color = "red", size = 3) + 
+  labs(title = "Distribuição e média (ponto vermelho) de d_art na amostra")
+```
+
+##### Qual a diferença na amostra
+
+```{r}
+agrupado = iat %>% 
+    group_by(sex) %>% 
+    summarise(media = mean(d_art), 
+              .groups = "drop")
+
+agrupado
+```
+
+
+```{r}
+m = agrupado %>% filter(sex == "m") %>% pull(media)
+f = agrupado %>% filter(sex == "f") %>% pull(media)
+m - f
+```
+
+#### Comparação via ICs
+
+```{r}
+library(boot)
+
+theta <- function(d, i) {
+    agrupado = d %>% 
+        slice(i) %>% 
+        group_by(sex) %>% 
+        summarise(media = mean(d_art), .groups = "drop")
+    m = agrupado %>% filter(sex == "m") %>% pull(media)
+    f = agrupado %>% filter(sex == "f") %>% pull(media)
+    m - f
+}
+
+booted <- boot(data = iat, 
+               statistic = theta, 
+               R = 2000)
+
+ci = tidy(booted, 
+          conf.level = .95,
+          conf.method = "bca",
+          conf.int = TRUE)
+
+glimpse(ci)
+```
+
+```{r}
+ci %>%
+    ggplot(aes(
+        x = "",
+        y = statistic,
+        ymin = conf.low,
+        ymax = conf.high
+    )) +
+    geom_pointrange() +
+    geom_point(size = 3) + 
+    scale_y_continuous(limits = c(-1.5, 1.5)) + 
+    labs(x = "Diferença das médias", 
+         y = "IAT homens - mulheres")
+```
+
+```{r}
+p1 = iat %>% 
+    ggplot(aes(x = sex, y = d_art)) +
+    geom_quasirandom(width = .1, alpha = .7) + 
+    stat_summary(geom = "point", fun = "mean", color = "red", size = 5)
+
+p2 = ci %>%
+    ggplot(aes(
+        x = "",
+        y = statistic,
+        ymin = conf.low,
+        ymax = conf.high
+    )) +
+    geom_pointrange() +
+    geom_point(size = 3) + 
+    ylim(-1, 1) + 
+    labs(x = "Diferença", 
+         y = "IAT homens - mulheres")
+
+grid.arrange(p1, p2, ncol = 2)
+glimpse(ci)
+
+```
+
+### Conclusão
+
+<!--**Apague esse parágrafo, e no seguinte substitua no mínimo as partes em negrito por texto seu. Pode substituir o quanto quiser**.-->
+
+Utilizando a base de dados da University of Virginia (uva.csv), tem-se as observações abaixo:
+
+Em média, as mulheres que participaram do experimento tiveram uma associação implícita (medida pelo IAT) positiva em relação à matemática e também forte, se levarmos em conta uma alta taxa de mulheres com aversão acima de 0,5 na medida. No total de 57 pessoas do sexo feminino analisadas, a média da distribuição ficou em torno de 0,62 com um desvio padrão de 0,43, já a mediana ficou em torno de 0,72, indicando uma alta preferência à artes em relação a matemática.
+
+Para as pessoas do sexo masculino analisadas, 24 no total, tiveram uma associação também positiva com a matemática, no caso a média da distribuição ficou acima de 0, porém foi bem fraca, ao contrário que a das mulheres, com uma média em torno de 0,1 e um desvio padrão de 0,5, e a mediana bem próxima à média, atingindo 0,19.
+
+Levando em conta apenas a diferença das médias de IAT, tem-se uma diferença realmente considerável entre homens e mulheres, em torno de -0,52, significando uma preferência à matemática em relação à artes, apesar das mulheres preferirem artes. Levando em consideração o Intervalo de Confiança com valor de 95%, a diferença pode ser bem grande, em que os valores mínimo e máximo do intervalo são -0,77 e -0,29, respectivamente.
+
+<!--Houve portanto uma **grande/considerável/pequena/desprezível** diferença entre homens e mulheres (**diferença das médias XXXX, 95% CI [CCC, DDD]**). Os dados de nosso experimento portanto apontam que... **COMPLETE AQUI**.
+
+Em média, as mulheres que participaram do experimento tiveram uma associação implícita (medida pelo IAT) com a matemática **positiva/negativa** e **fraca/média/forte** (**média XXX, desv. padrão YYY, N = ZZZ**). Homens tiveram uma associação **positiva/negativa** com a matemática, portanto **maior/menor** que a das mulheres (**média XXX , desv. padrão YYY, N = ZZZ**). Houve portanto uma **grande/considerável/pequena/desprezível** diferença entre homens e mulheres (**diferença das médias XXXX, 95% CI [CCC, DDD]**). Os dados de nosso experimento portanto apontam que... **COMPLETE AQUI**.
+
+--- 
+*Exemplos de possíveis conclusões para completar*
+
+  * mulheres têm uma associação negativa consideravelmente mais forte, com uma diferença que provavelmente está entre 0.6 e 1.0 ponto na escala IAT, o suficiente para diferenciar uma associação neutra de uma muito forte contra a matemática.
+  * mulheres têm uma associação negativa mais forte, porém não é claro se essa diferença é grande, moderada ou pequena. É necessário coletar mais dados para determinar se a diferença é relevante ou negligenciável. 
+  * mulheres podem ter um associação negativa forte, pode não haver diferença entre sexos ou homens podem ter atitudes negativas um pouco mais fortes ou moderadamente mais fortes. 
+  * não há evidência clara de uma diferença relevante entre sexos: os dados apontam que ela pode não existir e, se ela existir, ela é pequena em qualquer das direções.-->

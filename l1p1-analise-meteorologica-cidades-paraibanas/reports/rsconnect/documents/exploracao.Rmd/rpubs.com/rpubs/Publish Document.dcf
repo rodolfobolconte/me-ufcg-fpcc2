@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/752775/faf740306f4642c18bbfa36643ad0657
+bundleId: https://api.rpubs.com/api/v1/document/752775/faf740306f4642c18bbfa36643ad0657
+url: http://rpubs.com/rodolfobolconte/752775
+when: 1619214151.33856
+lastSyncTime: 1619214151.33856

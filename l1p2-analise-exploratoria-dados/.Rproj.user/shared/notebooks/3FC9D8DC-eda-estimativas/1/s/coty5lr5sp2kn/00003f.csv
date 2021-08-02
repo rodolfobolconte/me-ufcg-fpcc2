@@ -1,0 +1,7 @@
+"0","tarefas %>%"
+"0","    count(category) %>% "
+"0","    ggplot(aes(n, category, fill=category)) +"
+"0","    geom_col(width=0.3) +"
+"0","    geom_text(aes(label = n), hjust = 1.2, vjust=0.3) +"
+"0","    labs(title='Gráfico 1:\nQuantidade de Tarefas por Categoria Pai', x='Quantidade', y='Categorias', fill='Categorias') +"
+"0","    theme(plot.title=element_text(hjust=0.5))"

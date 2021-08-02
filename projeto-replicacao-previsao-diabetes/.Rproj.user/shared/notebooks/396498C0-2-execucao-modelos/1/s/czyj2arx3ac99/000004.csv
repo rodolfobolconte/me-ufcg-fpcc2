@@ -1,0 +1,4 @@
+"0","rf_ic = ic_acuracia(rf_data_ic)"
+"0","svm_ic = ic_acuracia(svm_data_ic)"
+"0",""
+"0","models_data_ic = bind_rows(rf_ic %>% mutate(modelo=""Random Forest""), svm_ic %>% mutate(modelo=""Support Vector Machine""))"

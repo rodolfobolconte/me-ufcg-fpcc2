@@ -1,0 +1,5 @@
+"0","ds_kfold = trainControl(method='cv', number=5, p=.7)
+"
+"2","Error in trainControl(method = ""cv"", number = 5, p = 0.7) : 
+  não foi possível encontrar a função ""trainControl""
+"

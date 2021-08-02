@@ -1,0 +1,8 @@
+"0","por_task = estimativas_raw %>%"
+"0","    group_by(project_code, task_number, category, sub_category, priority, summary) %>%"
+"0","    summarise("
+"0","        hours_estimate = mean(hours_estimate),"
+"0","        hours_actual = mean(hours_actual),"
+"0","        erro_absoluto = abs(hours_estimate - hours_actual),"
+"0","        .groups = ""drop"""
+"0","    ) "

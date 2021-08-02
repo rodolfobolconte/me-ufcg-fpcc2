@@ -1,0 +1,276 @@
+---
+title: "Análise de Correlação em dados meteorológicos do INMET"
+author: Rodolfo Bolconte
+date: 25/04/20
+output:
+    rmdformats::readthedown
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      #warning=FALSE, message=FALSE,
+                      fig.width = 8,
+                      fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+## Os Dados
+
+Dados vêm do [BDMEP](https://tempo.inmet.gov.br/) . Selecionei lá a estação convencional em João Pessoa, Campina Grande e Patos - PB, e baixei os csvs com dados desde 2010.
+
+Os dados brutos estão em `data/raw`. O código em `transform` faz ETL e o coloca em `data/`.
+
+No processo de ETL, calculamos as variáveis de interesse por semana. Isso porque há bastante medições vazias nas estações, e queremos deixar o dado mais fácil de ser trabalhado. Mas ainda há várias semanas onde alguma ou todas as medidas são NA.
+
+### Escopo e Carregamento de Dados
+
+```{r }
+library(tidyverse)
+library(here)
+library(scales)
+theme_set(theme_bw())
+
+clima_tudo = read_csv(
+    here("data/tempo-jp-cg-pt.csv"),
+    col_types = cols(
+        .default = col_double(),
+        cidade = col_character(),
+        semana = col_date(format = ""),
+        ano = col_integer(),
+        mes = col_integer()
+    )
+)
+```
+
+## Atividade
+
+Nesse exercício, revisitaremos os dados meteorológicos com novas perguntas. Nosso objetivo é agora fazer uma análise: 
+
+- Em grupo;
+- Nos esforçando em usar o vocabulário de descrição de distribuições e correlação;
+- Incorporando o feedback do lab 1;
+- Com uma complexidade e com sutilezas novas
+
+### Questões de Estudo
+
+João Pessoa, Campina Grande e Patos são 3 referências para entender o clima na Paraíba. A primeira cidade está no litoral, a segunda próximo ao topo da Serra da Borborema, e a terceira no Sertão. Nesse exercício, você experimentará com o processo de análise exploratória dos dados usando dados dessas 3 cidades. O resultado será um relatório em RMarkdown publicado para as seguintes questões.
+
+Na resposta das perguntas abaixo queremos dar ênfase à análise de distribuições e usos de sumários, então não use nenhuma visualização de linha do tempo. Também lembre que a resposta a qualquer tarefa de análise é uma combinação de visualização de dados, sumários estatísticos e texto que interpreta ambos. Ao acabar cada resposta, confira se você tem esses 3 elementos. Você descreveu as distribuições envolvidas? Comentou em formato e pontos extremos? Está comentando as diferenças que observa? Elas são grandes? Pequenas?
+
+#### Questão 1
+
+**1- Descreva a relação entre temperatura média, umidade e chuvas por semana nas 3 cidades, analisando essas características duas a duas. Além de descrever as relações, comparando-as entre cidades e para uma mesma cidade, comente o que se deve esperar em geral em uma semana mais fria nas 3 cidades.**
+
+##### Temperatura Média e Umidade
+
+```{r}
+climaQ1 = clima_tudo %>% 
+    filter(ano>=2010, ano<=2020)
+
+#GRÁFICOS 1 E 2 DE TEMPERATURA MÉDIA E UMIDADE
+climaQ1 %>% 
+    ggplot(aes(temp_media, umidade, color=cidade))+
+    geom_jitter(size=3, alpha=.3) +
+    scale_x_continuous(breaks=seq(20,32.5,1.5)) +
+    scale_color_manual(values=c("red", "green", "blue")) +
+    labs(title="Gráfico 1:\nRelação entre Temperatura Média e Umidade", subtitle="Dados por Semana (2010 - 2020)\n", x="\nTemperatura Média (ºC)", y="Umidade (%)\n", color="Cidades") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+
+tam1=5
+climaQ1 %>% 
+    filter(temp_media!=is.na(TRUE), umidade!=is.na(TRUE)) %>%
+    group_by(cidade) %>%
+    summarise(pearson=cor(temp_media, umidade, method='pearson'),
+              spearman=cor(temp_media, umidade, method='spearman'),
+              kendall=cor(temp_media, umidade, method='kendall')) %>% 
+    ggplot(aes(y=cidade)) +
+    geom_point(aes(pearson, color='red'), size=tam1, alpha=.5) +
+    geom_point(aes(spearman, color='green'), size=tam1, alpha=.5) +
+    geom_point(aes(kendall, color='blue'), size=tam1, alpha=.5) +
+    scale_x_continuous(breaks=seq(0,-1,-0.2),
+                       limits=c(-1,0)) +
+    scale_y_discrete(labels=wrap_format(10)) +
+    scale_colour_manual(name='Correlações',
+                        values=c('red'='red','green'='green','blue'='blue'),
+                        labels=c('Kendall','Spearman','Pearson')) +
+    labs(title="Gráfico 2:\nCorrelação entre Temperatura Média e Umidade", subtitle="Dados por Semana (2010 - 2020)\n", x="\nCorrelação", y="Cidade\n") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+```
+
+A partir do Gráfico 1 já é possível perceber uma correlação linear negativa entre a Temperatura Média e Umidade de acordo com as semanas, em que na medida que a temperatura aumenta, a umidade tende a ser menor. O que se pode concluir é que no momento em que as Semanas são mais frias através da ocorrência de baixas temperaturas, a Umidade tende a ser maior. Um bom exemplo é a cidade de Campina Grande, que ao longo dos anos possuiu uma concentração de temperatura média entre 21,5 e 26 ºC, sendo o intervalo de temperatura de 21 à 23,5 ºC com uma Umidade maior (de 70 à 90%) que no intervalo de temperaturas entre 23,5 e 26 ºC.
+
+No Gráfico 2 a correlação é melhor descrita de forma numérica através dos índices de Pearson, Spearman e Kendall. Levando em consideração as 3 correlações ao mesmo tempo, João Pessoa é a cidade que apresenta uma correlação menor (se levarmos em conta que próximo de 0 é uma correlação fraca e próximo de -1 é uma correlação forte, apesar da linearidade negativa geral), evidenciada também no Gráfico 1 em que os valores das semanas de João Pessoa estão pouco mais distantes da diagonal da escala gráfica. Já Campina Grande, atingiu o menor valor entre os índices, com cerca de -0,7 na correlação de Pearson, significando em uma correlação forte entre as duas variáveis.
+
+##### Temperatura Média e Chuva
+
+```{r}
+#GRÁFICOS 3 E 4 DE TEMPERATURA MÉDIA E CHUVA
+
+climaQ1 %>% 
+    ggplot(aes(y=temp_media, chuva)) +
+    geom_jitter(size=3, alpha=.1, color='darkblue') +
+    facet_wrap(~cidade, ncol=1) +
+    #scale_x_continuous(breaks=seq(20,32.5,1.5)) +
+    scale_color_manual(values=c("red", "green", "blue")) +
+    labs(title="Gráfico 3:\nRelação entre Temperatura Média e Chuva", subtitle="Dados por Semana (2010 - 2020)\n", y="Temperatura Média (ºC)\n", x="\nChuva (mm)") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+
+climaQ1 %>% 
+    filter(temp_media!=is.na(TRUE), chuva!=is.na(TRUE)) %>%
+    group_by(cidade) %>%
+    summarise(pearson=cor(temp_media, chuva, method='pearson'),
+              spearman=cor(temp_media, chuva, method='spearman'),
+              kendall=cor(temp_media, chuva, method='kendall')) %>% 
+    ggplot(aes(y=cidade)) +
+    geom_point(aes(pearson, color='red'), size=tam1, alpha=.5) +
+    geom_point(aes(spearman, color='green'), size=tam1, alpha=.5) +
+    geom_point(aes(kendall, color='blue'), size=tam1, alpha=.5) +
+    scale_x_continuous(breaks=seq(0,-1,-0.2),
+                       limits=c(-1,0)) +
+    scale_y_discrete(labels=wrap_format(10)) +
+    scale_colour_manual(name='Correlações',
+                        values=c('red'='red','green'='green','blue'='blue'),
+                        labels=c('Kendall','Spearman','Pearson')) +
+    labs(title="Gráfico 4:\nCorrelação entre Temperatura Média e Chuva", subtitle="Dados por Semana (2010 - 2020)\n", x="\nCorrelação", y="Cidade\n") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+```
+
+Analisando o Gráfico 3, não fica muito clara uma correlação existente entre a Temperatura Média e o nível das Chuvas das cidades, uma vez que existem valores altos para as chuvas tanto em temperaturas altas como baixas, caso não se considere os outliers. Porém, comparando entre as cidades, João Pessoa apresentou valores de chuva mais valores a partir dos 100 milímetros, seguido de Patos e Campina Grande.
+
+No Gráfico 4 é possível confirmar a baixa correlação entre as duas variáveis, uma vez que os índices não ultrapassam o valor de -0,5 na escala. Desta vez, Patos apresentou os menores índices, entre -0,1 e -0,05, porém é curioso que os valores das 3 correlações são bem próximos. Já João Pessoa e Campina Grande apresentaram valores próximos entre ambas, entre -0,45 e -0,28.
+
+Sendo assim, não é possível concluir com exatidão se com uma Temperatura baixa, haverão mais ou menos chuva nas cidades.
+
+##### Umidade e Chuva
+
+```{r}
+#GRÁFICOS 5 E 6 DE UMIDADE E CHUVA
+
+climaQ1 %>% 
+    ggplot(aes(y=chuva, umidade, color=cidade)) +
+    geom_jitter(size=3, alpha=.3) +
+    facet_wrap(~cidade, scales="free_x") +
+    scale_x_continuous(breaks=seq(40,100,10)) +
+    scale_color_manual(values=c("red", "green", "blue")) +
+    labs(title="Gráfico 5:\nRelação entre Umidade e Chuva", subtitle="Dados por Semana (2010 - 2020)\n", x="\nUmidade (%)", y="Chuva (mm)\n", color="Cidades") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+
+climaQ1 %>% 
+    filter(umidade!=is.na(TRUE), chuva!=is.na(TRUE)) %>%
+    group_by(cidade) %>%
+    summarise(pearson=cor(umidade, chuva, method='pearson'),
+              spearman=cor(umidade, chuva, method='spearman'),
+              kendall=cor(umidade, chuva, method='kendall')) %>% 
+    ggplot(aes(y=cidade)) +
+    geom_point(aes(pearson, color='red'), size=tam1, alpha=.5) +
+    geom_point(aes(spearman, color='green'), size=tam1, alpha=.5) +
+    geom_point(aes(kendall, color='blue'), size=tam1, alpha=.5) +
+    scale_x_continuous(breaks=seq(0,1,0.2),
+                       limits=c(0,1)) +
+    scale_y_discrete(labels=wrap_format(10)) +
+    scale_colour_manual(name='Correlações',
+                        values=c('red'='red','green'='green','blue'='blue'),
+                        labels=c('Kendall','Spearman','Pearson')) +
+    labs(title="Gráfico 6:\nCorrelação entre Umidade e Chuva", subtitle="Dados por Semana (2010 - 2020)\n", x="\nCorrelação", y="Cidade\n") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+```
+
+Com o Gráfico 5, apesar de uma forte concentração de valores em 0mm indicando a não ocorrência de chuvas, é perceptível uma correlação linear positiva entre as variáveis, indicando que quanto maior é a porcentagem de Umidade, maior é a quantidade de Chuvas nas cidades. João Pessoa é a cidade que mais destaca esta correlação no gráfico, uma vez que é possível visualizar uma forte concentração de pontos extremos à direita, entre valores de 80 à 90% de Umidade. Já a cidade de Patos apresenta uma concentração maior de valores de chuva em 0mm distribuídos numa maior faixa de valores de Umidade, de 40 à 85%, enfraquecendo a correlação de tais variáveis.
+
+Com o Gráfico 6, é possível perceber a correlação positiva entre os valores, em que já é evidente a correlação fraca das variáveis na cidade Patos, onde os valores dos índices não ultrapassam 0,5, sendo o índice de Kendall o menor, atingindo por volta dos 0,28. Em contra partida, a cidade de João Pessoa apresenta valores altos de correlação, entre 0,63 e 0,83, seguida de Campina Grande, com valores entre 0,5 e 0,71.
+
+Sendo assim, é possível concluir a possibilidade de quanto maior a porcentagem de Umidade do ar nas cidades, maior serão os índices de Chuvas ocorridas e vice-versa.
+
+#### Questão 2
+
+**2- Escolha duas das cidades e compare a temperatura e as chuvas das duas nos últimos doze meses. Quantifique e comente a diferença entre a temperatura nas duas cidades. Lembre que você tem medições pareadas das variáveis para as duas cidades, e lembre de olhar a distribuição além de qualquer sumário que você escolher.**
+
+```{r}
+#GRÁFICOS 7 E 8 DE TEMPERATURA MÉDIA E CHUVA de CG E JP
+
+climaQ2 = clima_tudo %>% 
+    filter(semana >= as.POSIXct("2020-03-01"), cidade!='Patos')
+
+climaQ2 %>% 
+    ggplot(aes(temp_media, cidade)) +
+    geom_boxplot(color='black') +
+    geom_jitter(color='steelblue', height=.1, size=4, alpha=.5) +
+    scale_y_discrete(labels=wrap_format(10)) +
+    labs(title="Gráfico 7:\nDistribuição da Temperatura Média das Cidades", subtitle="Dados dos últimos 12 meses (03/2020 - 03/2021)\n", x="\nTemperatura Média (ºC)", y="Cidade\n") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+
+climaQ2 %>%
+    ggplot(aes(y=temp_media, chuva, color=cidade)) +
+    geom_rug() +
+    geom_point(size=tam1, alpha=.5) +
+    labs(title="Gráfico 8:\nRelação entre Temperatura Média\ne Chuvas das Cidades", subtitle="Dados dos últimos 12 meses (03/2020 - 03/2021)\n", y="Temperatura Média (ºC)\n", x="\nChuva (mm)", color="Cidade") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+```
+
+As cidades escolhidas para a questão foram Campina Grande e João Pessoa. Patos não foi considerada pois não possui valores de Temperatura Média desde a metade de Março de 2020.
+
+No Gráfico 7 é possível tomar ciência da distribuição da Temperatura Média das cidades com o apoio dos boxplots, em que 50% das temperaturas nos últimos 12 meses estão concentradas entre 24,4 e 26,2 ºC na cidade de Campina Grande, já em Joao Pessoas, se concentram entre 26,7 e 28,7 ºC, que podemos considerar como sendo uma cidade mais quente que Campina. Nas duas cidades, a variação de temperaturas compreendeu um intervalo em torno de 5 ºC.
+
+No Gráfico 8 ao colocar em evidência a Temperatura Média com o índice de Chuvas, é possível perceber um volume maior de chuvas na cidade de João Pessoa, ultrapassando várias vezes a casa dos 75 milímetros nas semanas, em contrapartida com Campina Grande, que apresentou chuvas de mais de 50 milímetros somente em 4 semanas nos últimos 12 meses.
+
+Embora não tenhas sido calculados os índices de Correlação entre Temperatura Média e Chuva das cidades somente nos últimos 12 meses, se pegarmos os valores da primeira questão, realmente a correlação entre as variáveis não é tão forte, em que não chega a ultrapassar -0,5, sendo assim não significa dizer que quanto mais a temperatura é baixa, maiores são as chuvas, uma vez que a cidade de João Pessoa atingindo temperaturas maiores, registrou índices maiores de chuvas.
+
+#### Questão 3
+
+**3- Escolha uma das cidades e compare a temperatura e as chuvas das semanas de 2021 com a temperatura e chuva das semanas dos últimos 10 anos. Esse ano tem sido um ano muito quente? Com muita chuva? Compare as distribuições.**
+
+```{r}
+#GRÁFICOS  DE TEMPERATURA MÉDIA E CHUVA de CG E JP de 2010 à 2021
+
+climaQ3 = clima_tudo %>%
+    filter(cidade=="Campina Grande", between(mes,1,3), semana!=as.POSIXct("2017-01-01")) %>% 
+    mutate(mes=ifelse(mes==1, "Janeiro", ifelse(mes==2, "Fevereiro", "Março")))
+
+climaQ3ate20 = climaQ3 %>% 
+    filter(ano!=2021)
+climaQ3so21 = climaQ3 %>% 
+    filter(ano==2021)
+
+climaQ3ate20 %>% 
+    ggplot(aes(y=temp_media)) +
+    geom_point(aes(chuva, color='2020'), size=3, alpha=.5) +
+    geom_point(data=climaQ3so21, aes(chuva, color='2021'), size=tam1, alpha=.5) +
+    scale_color_manual(name='Anos',
+                        values=c('2020'='red','2021'='blue'),
+                        labels=c('2010-2020','2021')) +
+    labs(title="Gráfico 9:\nRelação da Temperatura Média com Chuvas em 2021\ncom demais anos de Campina Grande", subtitle="Dados dos últimos 11 anos ([01-03]/[2010-2021])\n", y="Temperatura Média (ºC)\n", x="\nChuva (mm)") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+
+
+climaQ3ate20 %>% 
+    ggplot(aes(y=reorder(mes, -temp_media), temp_media)) +
+    geom_point(aes(color='2020'), size=3, alpha=.2 ) +
+    geom_point(data=climaQ3so21, aes(x=temp_media, color='2021'), size=tam1, alpha=.3) +
+    scale_color_manual(name='Anos',
+                        values=c('2020'='red','2021'='blue'),
+                        labels=c('2010-2020','2021')) +
+    labs(title="Gráfico 10:\nComparação da Temperatura Média em 2021\ncom demais anos de Campina Grande", subtitle="Dados dos últimos 11 anos ([01-03]/[2010-2021])\n", x="\nTemperatura Média (ºC)", y="Meses\n") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+
+
+climaQ3ate20 %>% 
+    ggplot(aes(y=reorder(mes, -temp_media), chuva)) +
+    geom_point(aes(color='2020'), size=3, alpha=.2) +
+    geom_point(data=climaQ3so21, aes(x=chuva, color='2021'), size=tam1, alpha=.3) +
+    scale_color_manual(name='Anos',
+                        values=c('2020'='red','2021'='blue'),
+                        labels=c('2010-2020','2021')) +
+    labs(title="Gráfico 11:\nComparação das Chuvas em 2021\ncom demais anos de Campina Grande", subtitle="Dados dos últimos 11 anos ([01-03]/[2010-2021])\n", x="\nChuva (mm)", y="Meses\n") +
+    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))
+
+```
+
+A cidade escolhida para ser analisada na Questão 3 foi Campina Grande, apenas por questão de familiaridade. Com relação aos meses levados em consideração, foram Janeiro, Feveiro e Março, visto que estes são os únicos meses disponibilizados para o ano de 2021 no conjunto de dados.
+
+O Gráfico 9 coloca em evidência a Temperatura Média com os índices de Chuvas na cidade, coloridos de acordo com os anos analisados, em que fica claro o baixo índice de chuvas nos 3 meses de 2021, com apenas uma semana registrando chuva maior que 30 milímetros, o restante das semanas, registraram chuvas de até 15 milímetros, sendo todas elas concentradas em temperaturas de 25 à 27 ºC.
+
+Comparando as variáveis individualmente, a Temperatura Média na cidade em 2021 ficou entre 26 e 27 ºC no mês de Janeiro, 24,8 e 26,5 ºC em Fevereiro (apresentando a menor média no ano) e entre 25,5 e 26,5 ºC em Março. Ao longo dos anos, as Temperaturas tiveram uma maior concentração entre 25,3 e 26,5 ºC. Tais informações são amostradas no Gráfico 10.
+
+Já no Gráfico 11 a variável de Chuvas é comparada, que deixa claro uma variação quase nula em Janeiro de 2021, por volta de 0 à 5 milímetros registrados, enquanto Fevereiro foi o mês que apresentou um índice de chuva acima dos 30 milímetros. Ao longo dos anos, Fevereiro se mostra também como o mês que apresenta chuvas com maiores milimetragens, apesar de Março, visualmente explanando, apresentar uma concentração maior de chuvas de 0 à 15 milímetros.
+
+O que se pode concluir para esta questão é que até agora o ano de 2021 tem registrado poucas chuvas, porém com temperaturas médias dentro do esperado quando comparadas com as temperaturas de anos anteriores, ressaltando um clima frio na cidade.

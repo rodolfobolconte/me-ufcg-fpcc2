@@ -1,0 +1,7 @@
+"0",""
+"0","climaQ2 %>%"
+"0","    ggplot(aes(y=temp_media, chuva, color=cidade)) +"
+"0","    geom_rug() +"
+"0","    geom_point(size=tam1, alpha=.5) +"
+"0","    labs(title=""Gráfico 8:\nRelação entre Temperatura Média\ne Chuvas das Cidades"", subtitle=""Dados dos últimos 12 meses (03/2020 - 03/2021)\n"", y=""Temperatura Média (ºC)\n"", x=""\nChuva (mm)"", color=""Cidade"") +"
+"0","    theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5), text=element_text(size=16))"

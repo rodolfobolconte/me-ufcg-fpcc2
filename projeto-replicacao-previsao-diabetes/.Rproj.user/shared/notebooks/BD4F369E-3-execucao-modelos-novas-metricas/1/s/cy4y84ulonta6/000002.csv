@@ -1,0 +1,23 @@
+"0","#CARREGAMENTO DO CONJUNTO DE DADO"
+"0","dados = read_csv(here::here(""code/diabetes_random.csv""))"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m---------------------------------------------------------------[39m
+cols(
+  usuario = [32mcol_double()[39m,
+  hipertenso = [32mcol_double()[39m,
+  caloria = [32mcol_double()[39m,
+  colesterol = [32mcol_double()[39m,
+  dieta = [32mcol_double()[39m,
+  fitness = [32mcol_double()[39m,
+  imc = [32mcol_double()[39m,
+  alcool = [32mcol_double()[39m,
+  fumo = [32mcol_double()[39m,
+  diabetico = [32mcol_double()[39m
+)
+
+"
+"0","dados = dados %>% mutate(diabetico=if_else(diabetico==2, 0, 1))"
+"0",""
+"0","dataset = dados[2:10]"
+"0",""
+"0","dataset$diabetico = factor(dataset$diabetico, levels=c(0,1))"

@@ -1,0 +1,16 @@
+"0","dataset = read_csv(here::here(""data/participation-per-country.csv""))"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m------------------------------------------------------------------------------------[39m
+cols(
+  .default = col_double(),
+  site = [31mcol_character()[39m,
+  country = [31mcol_character()[39m,
+  geo = [31mcol_character()[39m,
+  four_regions = [31mcol_character()[39m,
+  eight_regions = [31mcol_character()[39m,
+  six_regions = [31mcol_character()[39m,
+  `World bank income group 2017` = [31mcol_character()[39m
+)
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m for the full column specifications.
+
+"

@@ -1,0 +1,199 @@
+---
+title: "1 - Tratamento dos dados de Diabetes"
+author: Rodolfo Bolconte
+date: 26/06/21
+output:
+    #word_document: default
+    html_document:
+        rmdformats::readthedown
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      warning=FALSE, message=FALSE,
+                      fig.width = 8,
+                      fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+Repositório dos Dados Originais: https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=Questionnaire&CycleBeginYear=2015
+Documentação dos Dados: https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/DIQ_I.htm
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+theme_set(theme_bw())
+library(boot)
+library(broom)
+library(grid)
+library(gridExtra)
+library(quantreg)
+library(scales)
+```
+
+## Carregamento dos Dados
+
+```{r}
+#CARREGAMENTO DOS CONJUNTOS DE DADOS
+alcool = read_csv(here::here("data/alcool.csv"))
+caloria = read_csv(here::here("data/caloria.csv"))
+diabetes = read_csv(here::here("data/diabetes.csv"))
+fumante = read_csv(here::here("data/fumante.csv"))
+imc = read_csv(here::here("data/imc.csv"))
+
+alcool = alcool %>% select(SEQN, ALQ130)
+caloria = caloria %>% select(SEQN, DRQSDT1)
+diabetes = diabetes %>% select(SEQN, DIQ175J,DIQ175H,DIQ175D,DIQ175G, DIQ010)
+fumante = fumante %>% select(SEQN, SMD650)
+imc = imc %>% select(SEQN, BMXBMI)
+```
+
+```{r}
+#QUANTIDADE DE AMOSTRAS EM CADA DATASET
+count(alcool)
+count(caloria)
+count(diabetes)
+count(fumante)
+count(imc)
+```
+
+```{r}
+#INSERINDO COLUNA DE ALCOOL NO DS DE DIABETES
+diab2 = diabetes %>% mutate(ALQ130=0)
+diab2 = unique(diab2)
+
+for(pessoa in diab2$SEQN) {
+  tryCatch(
+    expr = {
+      diab2[diab2$SEQN==pessoa,]$ALQ130 = alcool[alcool$SEQN==pessoa,]$ALQ130
+    },
+    error = function(e) {
+      return(0)
+    }
+  )
+}
+```
+
+```{r }
+#INSERINDO COLUNA DE IMC NO DS DE DIABETES
+diab2 = diab2 %>% mutate(BMXBMI=0)
+#diab2 = unique(diab2)
+
+for(pessoa in diab2$SEQN) {
+  tryCatch(
+    expr = {
+      diab2[diab2$SEQN==pessoa,]$BMXBMI = imc[imc$SEQN==pessoa,]$BMXBMI
+    },
+    error = function(e) {
+      return(0)
+    }
+  )
+}
+```
+
+```{r }
+#INSERINDO COLUNA DE CALORIA NO DS DE DIABETES
+diab2 = diab2 %>% mutate(DRQSDT1=0)
+#diab2 = unique(diab2)
+
+for(pessoa in diab2$SEQN) {
+  tryCatch(
+    expr = {
+      diab2[diab2$SEQN==pessoa,]$DRQSDT1 = caloria[caloria$SEQN==pessoa,]$DRQSDT1
+    },
+    error = function(e) {
+      return(0)
+    }
+  )
+}
+```
+
+```{r }
+#INSERINDO COLUNA DE FUMO NO DS DE DIABETES
+diab2 = diab2 %>% mutate(SMD650=0)
+#diab2 = unique(diab2)
+
+for(pessoa in diab2$SEQN) {
+  tryCatch(
+    expr = {
+      diab2[diab2$SEQN==pessoa,]$SMD650 = fumante[fumante$SEQN==pessoa,]$SMD650
+    },
+    error = function(e) {
+      return(0)
+    }
+  )
+}
+```
+
+```{r}
+#ALTERANDO O NOME DAS COLUNAS PARA O PORTUGUES
+diab2 = diab2 %>% 
+  select(SEQN, DIQ175H, DRQSDT1, DIQ175J, DIQ175D, DIQ175G, BMXBMI, ALQ130, SMD650, DIQ010)
+
+diab2 = diab2 %>% 
+  rename(usuario=SEQN,
+         hipertenso=DIQ175H,
+         caloria=DRQSDT1,
+         colesterol=DIQ175J,
+         dieta=DIQ175D,
+         fitness=DIQ175G,
+         imc=BMXBMI,
+         alcool=ALQ130,
+         fumo=SMD650,
+         diabetico=DIQ010)
+```
+
+```{r}
+#CONTAGEM DE AMOSTRAS DE CADA CLASSE DIABETICO
+diab2 %>% count(diabetico)
+```
+
+```{r}
+#CRIANDO DS APENAS DE DIABETICOS E NÃO DIABÉTICOS
+ds_bruto = diab2 %>% filter(diabetico<=2)
+
+tam=70
+
+#SEPARANDO DS PARA DIABETICOS E TIRANDO AMOSTRAS ALEATORIAS
+diabeticos = ds_bruto %>% filter(diabetico==1)
+diabeticos_random = diabeticos[sample(nrow(diabeticos), size=tam, replace=FALSE),]
+
+#SEPARANDO DS PARA NÃO DIABETICOS E TIRANDO AMOSTRAS ALEATORIAS  
+diabeticos_nao = ds_bruto %>% filter(diabetico==2)
+diabeticos_nao_random = diabeticos_nao[sample(nrow(diabeticos_nao), size=tam, replace=FALSE),]
+
+#CRIANDO DS COM AS AMOSTRAS ALEATORIAS
+ds_random = rbind(diabeticos_random, diabeticos_nao_random)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# write.csv(diab2, "./diabetes.csv", row.names = F)
+# write.csv(ds_random, "./diabetes_random.csv", row.names = F)
+```

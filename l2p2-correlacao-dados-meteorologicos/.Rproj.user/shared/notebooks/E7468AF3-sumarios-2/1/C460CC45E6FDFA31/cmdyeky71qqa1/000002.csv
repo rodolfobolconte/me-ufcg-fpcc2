@@ -1,0 +1,4 @@
+"0","variacao %>% "
+"0","    ggplot(aes(x = ano, y = interquartil, color = cidade)) + "
+"0","    geom_point() + "
+"0","    geom_line()"

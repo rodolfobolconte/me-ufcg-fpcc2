@@ -1,0 +1,16 @@
+"0","  dataset %>% 
+    ggplot(aes(x=statistic, xmin=conf.low, xmax=conf.high, y=variante_comparada)) +
+    geom_errorbar(width=.15) +
+    geom_point(size=4, color=cor, alpha=.6) +
+    labs(x=sorriso, y='Sorrisos\n') +
+    theme(text=element_text(size=16)) +
+    geom_vline(xintercept=0) +
+    geom_vline(xintercept=-.5, lty=2, alpha=.5) +
+    geom_vline(xintercept=.5, lty=2, alpha=.5) +
+    coord_flip() +
+    scale_y_discrete(labels=wrap_format(10)) +
+    scale_x_continuous(limits=c(-2,1.5))
+"
+"2","Error in ggplot(., aes(x = statistic, xmin = conf.low, xmax = conf.high,  : 
+  objeto 'dataset' não encontrado
+"

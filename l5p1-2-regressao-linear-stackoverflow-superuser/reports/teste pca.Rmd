@@ -1,0 +1,60 @@
+---
+title: "Testes PCA"
+author: Rodolfo Bolconte
+date: 14/06/21
+output:
+    word_document: default
+    html_document:
+        rmdformats::readthedown
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      warning=FALSE, message=FALSE,
+                      fig.width = 8,
+                      fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+theme_set(theme_bw())
+library(boot)
+library(broom)
+library(grid)
+library(gridExtra)
+library(quantreg)
+library(scales)
+```
+
+```{r}
+dataset = read_csv(here::here("data/participation-per-country.csv"))
+glimpse(dataset)
+```
+
+```{r}
+dados_pca = dataset[1:14]
+
+dados_pca = dados_pca %>% filter(site=="StackOverflow", GNI!='NA', Internet!='NA', EPI!='NA') %>% select(2:14)
+```
+
+```{r}
+paises5 = dados_pca %>% filter(country %in% c('China', 'Brazil', 'Russia', 'India', 'Mexico'))
+
+
+#write.csv2(paises5, "./paises5-pca.csv", row.names = F)
+
+#write.csv2(dados_pca, "./paises_all-pca.csv", row.names = F)
+
+df2 <- data.frame(t(paises5[-1]))
+colnames(df2) <- c('China', 'Brasil', 'Russia', 'India', 'Mexico')
+
+#write.csv2(df2, "./paises-pca2.csv")
+```
+

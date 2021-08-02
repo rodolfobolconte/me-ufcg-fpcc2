@@ -1,0 +1,345 @@
+---
+title: "L5P1 - Regressão com uso do Stack Overflow e Super User"
+author: Rodolfo Bolconte
+date: 31/05/21
+output:
+    #word_document: default
+    html_document:
+        rmdformats::readthedown
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      warning=FALSE, message=FALSE,
+                      fig.width = 8,
+                      fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+theme_set(theme_bw())
+library(boot)
+library(broom)
+library(grid)
+library(gridExtra)
+library(quantreg)
+library(scales)
+```
+
+Nessa parte do laboratório, queremos que você crie 3 modelos de regressão linear simples usando os dados de atividade de pessaos de diferentes países nos sits StackOverflow e SuperUser.
+
+Submeta um google doc como resultado. Use o parágrafo modelo que mostro no 2o vídeo de regressão e visualizações. Cuidado com a necessidade de transformações para que as relações que você modelará sejam lineares. Opcionalmente, faça inferência e comente os ICs dos coeficientes encontrados (basta o b_1, não precisa do b_0).
+
+## Carregamento dos Dados
+
+O repositório com os dados: https://github.com/cienciadedados-ufcg/vis-cultura-stackoverflow
+
+```{r}
+dataset = read_csv(here::here("data/participation-per-country.csv"))
+```
+
+## Questão 1
+
+**1. Descreva a relação entre EPI (fluência de inglês na população do país) e a taxa de pessoas daquele país que responderam alguma pergunta no StackOverflow.**
+
+```{r}
+dados_epi = dataset %>% 
+  select(site, country, eight_regions, responderam_prop, EPI) %>% 
+  filter(EPI != "NA")
+
+q1_dados = dados_epi %>% filter(site=="StackOverflow")
+
+q1_sumarios = q1_dados %>% 
+  group_by(eight_regions) %>% 
+  summarise(resp_min=min(responderam_prop),
+            resp_med=mean(responderam_prop),
+            resp_max=max(responderam_prop),
+            epi_min=min(EPI),
+            epi_med=mean(EPI),
+            epi_max=max(EPI))
+```
+
+```{r fig.cap='Gráfico 1.1: Visualização dos valores mínimos, médios e máximos do (a) Índice de Respostas das Perguntas e (b) English Proficiency Index (EPI), sendo valores referentes à países, porém agrupados em 7 regiões geográficas mundiais. Dados referentes ao site Stack Overflow.'}
+q1_graf_resp = q1_sumarios %>% 
+  ggplot(aes(y=reorder(eight_regions, resp_min))) +
+  geom_point(aes(resp_min), color='red', alpha=.5, size=4) +
+  geom_point(aes(resp_med), color='green', alpha=.5, size=4) +
+  geom_point(aes(resp_max), color='blue', alpha=.5, size=4) +
+  labs(y='Regiões Mundiais\n', x='\nÍndice de Respostas', subtitle='(a)') +
+  theme(text=element_text(size=16),
+        axis.text.x=element_text(angle=90, vjust=.5))
+
+q1_graf_epi = q1_sumarios %>% 
+  ggplot(aes(y=reorder(eight_regions, resp_min))) +
+  geom_point(aes(epi_min, color='epi_min'), alpha=.5, size=4) +
+  geom_point(aes(epi_med, color='epi_med'), alpha=.5, size=4) +
+  geom_point(aes(epi_max, color='epi_max'), alpha=.5, size=4) +
+  scale_color_manual(name='EPI:',
+                     values=c('epi_min'='red', 'epi_med'='green', 'epi_max'='blue'),
+                     labels=c('Máximo', 'Médio', 'Mínimo')) +
+  labs(y=NULL, x='\nEPI', subtitle='(b)') +
+  theme(text=element_text(size=16),
+        axis.text.x=element_text(angle=90, vjust=.5)) +
+  scale_y_discrete(labels=c(NULL, NULL,NULL, NULL,NULL, NULL,NULL, NULL))
+  
+
+grid.arrange(q1_graf_resp, q1_graf_epi, ncol=2, widths=c(1.3,1))
+```
+
+No Gráfico 1.1 são feitas análises dos valores dos Índices de Respostas no site do Stack Overflow e de English Proficiency Index (EPI), ambas variáveis de países sendo agrupadas por 7 regiões geográficas mundiais. Os valores foram sumarizados para apresentar os valores mínimos (Ponto Vermelho), máximos (Ponto Azul) e a média (Ponto Verde).
+
+A partir do gráfico é possível perceber que países do Oeste Europeu apresentam os maiores valores para os 3 sumários tanto no índice de respostas quanto em EPI, enquanto os menores valores são mais diversificados: para o índice de respostas, o menor valor mínimo se concentra em um país do Oeste Asiático, porém a menor média é alcançada por países do Leste Asiático do Pacífico. Para os valores EPI, o menor valor mínimo é encontrado no Oeste Asiático também, porém a menor média e concentra nos países do Norte Africano.
+
+Vale destacar os valores bem próximos dos 3 sumários nas duas variáveis para os países do Norte da África, enquanto nas demais regiões os valores dos sumários são mais distantes uns dos outros.
+
+```{r fig.cap="Gráfico 1.2: Visualização da dispersão de valores para o Índice de Respostas no site Stack Overflow e o valor de EPI, com uma linearidade feita de forma manual, sendo visualizada como uma linha na cor azul."}
+q1_dados %>% 
+  ggplot(aes(responderam_prop, EPI)) +
+  geom_point(size=3, alpha=.5) +
+  geom_abline(aes(slope=90, intercept=9, color='linha')) +
+  labs(x='\nÍndice de Resposta de Questões', y='EPI\n') +
+  scale_color_manual(name="Linha",
+                     values=c('linha'='blue'),
+                     labels=c('Linha Manual')) +
+  theme(text=element_text(size=16))
+```
+
+```{r fig.cap="Gráfico 1.3: Visualização da dispersão de valores para o Índice de Respostas no site Stack Overflow e o valor de EPI, com uma linearidade feita de forma manual (linha na cor azul), e uma linearidade elaborada a partir de um modelo de regressão (linha na cor vermelha)."}
+q1_modelo = lm(responderam_prop ~ EPI, data=q1_dados) # responderam_prop = b0 + b1 * EPI
+
+tidy(q1_modelo)
+glance(q1_modelo)
+
+q1_aug = q1_modelo %>% augment(q1_dados)
+
+q1_dados %>%
+  ggplot(aes(responderam_prop, EPI)) +
+  geom_point(size=3, alpha=.5) +
+  geom_abline(aes(slope=90, intercept=9, color='linha')) +
+  geom_line(aes(x=q1_aug$.fitted, color='fitted')) +
+  labs(x='\nÍndice de Resposta de Questões', y='EPI\n') +
+  scale_color_manual(name="Linha",
+                     values=c('linha'='blue', 'fitted'='red'),
+                     labels=c('Linha Modelo', 'Linha Manual')) +
+  theme(text=element_text(size=16))
+```
+
+Na questão foi utilizada a Regressão Linear Simples para amostrar e analisar a associação entre duas variáveis: Índice de Resposta de Questões e EPI a partir de usuários de diversos países que respondem à perguntas no site Stack Overflow.
+
+No Gráfico 1.2 foi traçada uma linearidade de forma manual, utilizando os valores de 90 para inclinação ($b_1$) e 9 para interceptação ($b_0$), gerando a função linear:
+
+$IndiceRespostas = 9 + 90 * EPI$.
+
+Já no Gráfico 1.3, foi criado um modelo linear computacional, resultando num formato de função:
+
+$IndiceRespostas = 0.0975 + 0.00753 * EPI$,
+
+que resulta em 45,5% da variância da variável, sendo $R^2=0,455$. A linearidade foi calculada para o conjunto de dados utilizando a função $augment()$ amostrada como a Linha Vermelha do Gráfico, enquanto a linearidade criada de forma manual é representada pelo Linha Azul.
+
+Sendo assim, é esperado que o aumento do valor de EPI gere um acréscimo em torno de 0.0075 do valor do índice de respostas, considerado um efeito pequeno ou quase nulo na relação.
+
+## Questão 2
+
+**2. Descreva a relação entre as mesmas duas variáveis no SuperUser e compare o comportamento das pessoas de diferentes países nos dois sites comparando os resultados dos dois modelos.**
+
+```{r}
+q2_dados = dados_epi %>% filter(site=="SuperUser")
+
+q2_sumarios = q2_dados %>% 
+  group_by(eight_regions) %>% 
+  summarise(resp_min=min(responderam_prop),
+            resp_med=mean(responderam_prop),
+            resp_max=max(responderam_prop),
+            epi_min=min(EPI),
+            epi_med=mean(EPI),
+            epi_max=max(EPI))
+```
+
+```{r fig.cap='Gráfico 2.1: Visualização dos valores mínimos, médios e máximos do (a) Índice de Respostas das Perguntas e (b) English Proficiency Index (EPI), sendo valores referentes à países, porém agrupados em 7 regiões geográficas mundiais. Dados referentes ao site Super User.'}
+q2_graf_resp = q2_sumarios %>% 
+  ggplot(aes(y=reorder(eight_regions, resp_min))) +
+  geom_point(aes(resp_min), color='red', alpha=.5, size=4) +
+  geom_point(aes(resp_med), color='green', alpha=.5, size=4) +
+  geom_point(aes(resp_max), color='blue', alpha=.5, size=4) +
+  labs(y='Regiões Mundiais\n', x='\nÍndice de Respostas', subtitle='(a)') +
+  theme(text=element_text(size=16),
+        axis.text.x=element_text(angle=90, vjust=.5))
+
+q2_graf_epi = q2_sumarios %>% 
+  ggplot(aes(y=reorder(eight_regions, resp_min))) +
+  geom_point(aes(epi_min, color='epi_min'), alpha=.5, size=4) +
+  geom_point(aes(epi_med, color='epi_med'), alpha=.5, size=4) +
+  geom_point(aes(epi_max, color='epi_max'), alpha=.5, size=4) +
+  scale_color_manual(name='EPI:',
+                     values=c('epi_min'='red', 'epi_med'='green', 'epi_max'='blue'),
+                     labels=c('Máximo', 'Médio', 'Mínimo')) +
+  labs(y=NULL, x='\nEPI', subtitle='(b)') +
+  theme(text=element_text(size=16),
+        axis.text.x=element_text(angle=90, vjust=.5)) +
+  scale_y_discrete(labels=c(NULL, NULL,NULL, NULL,NULL, NULL,NULL, NULL)) +
+  scale_x_continuous(breaks=seq(40.5,70.5,10))
+  
+
+grid.arrange(q2_graf_resp, q2_graf_epi, ncol=2, widths=c(1.3,1))
+```
+
+No Gráfico 2.1 são feitas análises dos valores dos Índices de Respostas e de EPI, assim como na Questão 1 (com mesma disposição de amostragem), porém os dados são referentes ao site Super User.
+
+Assim como os valores do site Stack Overflow, países do Oeste Europeu apresentam os maiores valores para o valor mínimo e médio no índice de respostas, porém o maior valor é atingido por país do Leste Europeu. Já os menores valores do índice se diverificam, sendo menor valor mínimo atingido por um país da América do Sul e a menor média um por país do Norte Africano.
+
+Assim como no site do Stack Overflow, os países do Norte da África apresentam valores bem próximos dos 3 sumários quanto ao índice de respostas.
+
+```{r fig.cap="Gráfico 2.2: Visualização da dispersão de valores para o Índice de Respostas no site Super User e o valor de EPI, com uma linearidade feita de forma manual, sendo visualizada como uma linha na cor azul."}
+q2_dados %>% 
+  ggplot(aes(responderam_prop, EPI)) +
+  geom_point(size=3, alpha=.5) +
+  geom_abline(aes(slope=270, intercept=-10, color='linha')) +
+  labs(x='\nÍndice de Resposta de Questões', y='EPI\n') +
+  scale_color_manual(name="Linha",
+                     values=c('linha'='blue'),
+                     labels=c('Linha Manual')) +
+  theme(text=element_text(size=16))
+```
+
+```{r fig.cap="Gráfico 2.3: Visualização da dispersão de valores para o Índice de Respostas no site Super User e o valor de EPI, com uma linearidade feita de forma manual (linha na cor azul), e uma linearidade elaborada a partir de um modelo de regressão (linha na cor vermelha)."}
+q2_modelo = lm(responderam_prop ~ EPI, data=q2_dados) # responderam_prop = b0 + b1 * EPI
+
+tidy(q2_modelo)
+glance(q2_modelo)
+
+q2_aug = q2_modelo %>% augment(q2_dados)
+
+q2_dados %>%
+  ggplot(aes(responderam_prop, EPI)) +
+  geom_point(size=3, alpha=.5) +
+  geom_abline(aes(slope=270, intercept=-10, color='linha')) +
+  geom_line(aes(x=q2_aug$.fitted, color='fitted')) +
+  labs(x='\nÍndice de Resposta de Questões', y='EPI\n') +
+  scale_color_manual(name="Linha",
+                     values=c('linha'='blue', 'fitted'='red'),
+                     labels=c('Linha Modelo', 'Linha Manual')) +
+  theme(text=element_text(size=16))
+```
+
+Na questão foi utilizada a Regressão Linear Simples para a analise da associação as variáveis: Índice de Resposta de Questões e EPI a partir de usuários de diversos países que respondem à perguntas no site Super User.
+
+No Gráfico 2.2 foi traçada uma linearidade de forma manual, utilizando os valores de 270 para inclinação ($b_1$) e -10 para interceptação ($b_0$), gerando a função linear:
+
+$IndiceRespostas = 270 - 10 * EPI$.
+
+Já no Gráfico 2.3, foi criado um modelo linear computacional, resultando num formato de função:
+
+$IndiceRespostas = 0.0985 + 0.00272 * EPI$,
+
+que resulta em 16% da variância da variável, sendo $R^2=0,160$. A linearidade foi calculada para o conjunto de dados utilizando a função $augment()$ amostrada como a Linha Vermelha do Gráfico, enquanto a linearidade criada de forma manual é representada pelo Linha Azul.
+
+Sendo assim, é esperado que o aumento do valor de EPI gera um decréscimo em torno de 0,0027 do valor do índice de respostas, considerado um efeito pequeno ou quase nulo na relação.
+
+## Questão 3
+
+**3. Descreva a relação entre GNI (produto interno bruto per cápita) dos países e a taxa de pessoas daquele país que responderam alguma pergunta no StackOverflow.**
+
+```{r}
+q3_dados = dataset %>% 
+  select(site, country, eight_regions, responderam_prop, GNI) %>% 
+  filter(GNI != "NA" & responderam_prop != "NA" & site=="StackOverflow")
+
+q3_sumarios = q3_dados %>% 
+  group_by(eight_regions) %>% 
+  summarise(resp_min=min(responderam_prop),
+            resp_med=mean(responderam_prop),
+            resp_max=max(responderam_prop),
+            gni_min=min(GNI),
+            gni_med=mean(GNI),
+            gni_max=max(GNI))
+```
+
+```{r fig.cap='Gráfico 3.1: Visualização dos valores mínimos, médios e máximos do (a) Índice de Respostas das Perguntas e (b) Gross National Income (GNI), sendo valores referentes à países, porém agrupados em 8 regiões geográficas mundiais. Dados referentes ao site Stack Overflow.'}
+q3_graf_resp = q3_sumarios %>% 
+  ggplot(aes(y=reorder(eight_regions, gni_min))) +
+  geom_point(aes(resp_min), color='red', alpha=.5, size=4) +
+  geom_point(aes(resp_med), color='green', alpha=.5, size=4) +
+  geom_point(aes(resp_max), color='blue', alpha=.5, size=4) +
+  labs(y='Regiões Mundiais\n', x='\nÍndice de\nRespostas', subtitle='(a)') +
+  theme(text=element_text(size=16),
+        axis.text.x=element_text(angle=90, vjust=.5)) +
+  scale_x_continuous(breaks=seq(.25,.75,.1))
+
+q3_graf_gni = q3_sumarios %>% 
+  ggplot(aes(y=reorder(eight_regions, gni_min))) +
+  geom_point(aes(gni_min, color='gni_min'), alpha=.5, size=4) +
+  geom_point(aes(gni_med, color='gni_med'), alpha=.5, size=4) +
+  geom_point(aes(gni_max, color='gni_max'), alpha=.5, size=4) +
+  scale_color_manual(name='GNI:',
+                     values=c('gni_min'='red', 'gni_med'='green', 'gni_max'='blue'),
+                     labels=c('Máximo', 'Médio', 'Mínimo')) +
+  labs(y=NULL, x='\nGNI', subtitle='(b)') +
+  theme(text=element_text(size=16),
+        axis.text.x=element_text(angle=90, vjust=.5)) +
+  scale_y_discrete(labels=c(NULL, NULL,NULL, NULL,NULL, NULL,NULL, NULL))
+
+grid.arrange(q3_graf_resp, q3_graf_gni, ncol=2, widths=c(1.3,1))
+```
+
+No Gráfico 3.1 são feitas análises dos valores dos Índices de Respostas do site Stack Overflow e de Gross National Income (GNI), com a mesma disposição visual das questões anteriores, com os dados referentes ao site Stack Overflow.
+
+Como os índices de respostas do Stack Overflow já foram discutidos na Questão 1, o foco desta discussão são os valores de GNI, em que os menores valores mínimo e médio são apresentados por países da África Subsariana, já o menor valor máximo é atingido por país do Leste Asiático do Pacífico. Já os maiores valores dos sumários de GNI são atingidos por países do Oeste Europeu, curiosamente com um país atingindo um valor próximo de 100000 de GNI.
+
+Assim como para os valores de EPI, os países do Norte da África apresentam valores bem próximos dos 3 sumários quanto aos valores de GNI.
+
+```{r fig.cap="Gráfico 3.2: Visualização da dispersão de valores para o Índice de Respostas no site Stack Overflow e o valor de GNI, com uma linearidade feita de forma manual, sendo visualizada como uma linha na cor azul."}
+q3_dados %>% 
+  ggplot(aes(responderam_prop, GNI)) +
+  geom_point(size=3, alpha=.5) +
+  scale_y_log10() +
+  geom_abline(aes(slope=10, intercept=-1, color='linha')) +
+  labs(x='\nÍndice de Resposta de Questões', y='GNI\n') +
+  scale_color_manual(name="Linha",
+                     values=c('linha'='blue'),
+                     labels=c('Linha Manual')) +
+  theme(text=element_text(size=16))
+```
+
+```{r fig.cap="Gráfico 3.3: Visualização da dispersão de valores para o Índice de Respostas no site Stack Overflow e o valor de GNI, com uma linearidade feita de forma manual (linha na cor azul), e uma linearidade elaborada a partir de um modelo de regressão (linha na cor vermelha)."}
+q3_modelo = lm(responderam_prop ~ log10(GNI), data=q3_dados) # responderam_prop = b0 + b1 * GNI
+
+tidy(q3_modelo)
+glance(q3_modelo)
+
+q3_aug = q3_modelo %>% augment(q3_dados)
+
+q3_dados %>%
+  ggplot(aes(responderam_prop, GNI)) +
+  geom_point(size=3, alpha=.5) +
+  scale_y_log10() +
+  geom_abline(aes(slope=10, intercept=-1, color='linha')) +
+  geom_line(aes(x=q3_aug$.fitted, color='fitted')) +
+  labs(x='\nÍndice de Resposta de Questões', y='GNI\n') +
+  scale_color_manual(name="Linha",
+                     values=c('linha'='blue', 'fitted'='red'),
+                     labels=c('Linha Modelo', 'Linha Manual')) +
+  theme(text=element_text(size=16))
+```
+
+Na questão foi utilizada a Regressão Linear Simples para a analise da associação as variáveis: Índice de Resposta de Questões e GNI a partir de usuários de diversos países que respondem à perguntas no site Stack Overflow.
+
+No Gráfico 3.2 foi traçada uma linearidade de forma manual, utilizando os valores de 10 para inclinação ($b_1$) e -1 para interceptação ($b_0$), gerando a função linear:
+
+$IndiceRespostas = 10 - 1 * log_{10}(GNI)$.
+
+Porém, esta função é definição em relação ao Log na base 10 dos valores de GNI, devida a uma melhor representação de linearidade entre os dados.
+
+Já no Gráfico 3.3, foi criado um modelo linear computacional, resultando num formato de função:
+
+$IndiceRespostas = 0.0421 + 0.1133 * log_{10}(GNI)$,
+
+que resulta em 45,8% da variância da variável, sendo $R^2=0.458$. A linearidade foi calculada para o conjunto de dados utilizando a função $augment()$ amostrada como a Linha Vermelha do Gráfico, enquanto a linearidade criada de forma manual é representada pelo Linha Azul.
+
+Sendo assim, é esperado que o aumento do valor de GNI gera um decréscimo em torno de 0,1133 do valor do índice de respostas, considerado um efeito pequeno ou quase nulo na relação.

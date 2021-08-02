@@ -1,0 +1,239 @@
+---
+title: "Análise Meteorológica em Cidades Paraibanas"
+author: Rodolfo Bolconte
+date: 18/04/20
+output:
+    rmdformats::readthedown
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      #fig.width = 7,
+                      #fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+A partir da disponibilização de [Dados Meteorológicos](https://tempo.inmet.gov.br/) por parte do Instituto Nacional de Meteorologia (INMET), será realizado abaixo uma análise com relação as métricas de Temperatura, Umidade e Chuva ao longo de 10 anos (2010-2019) de três cidades paraibanas: João Pessoa, Campina Grande e Patos.
+
+Esta Análise busca apresentar informações relacionadas à variação do Calor de acordo com os níveis de temperatura (P2)\*, os níveis de Umidade Atmosférica nos últimos anos (P3)\* e o clima no período junino (mês de Junho) nas cidades (P4)\*.
+
+###### \* Perguntas escolhidas
+
+## Organização dos Dados
+
+Utilização dos pacotes Tidyverse e Here, e dados pré-processados pelo professor Nazareno Ferreira.
+
+Vale ressaltar de imediato que foram computados valores semanais de acordo com o calendário de cada ano, isto significa que um mesmo mês pode ter 4 ou 5 semanas dependendo de cada ano, o que pode impactar numa análise mês a mês dependendo do tipo de dado.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+#importando pacotes
+library(tidyverse)
+library(here)
+theme_set(theme_bw())
+```
+
+```{r warning=FALSE, message=FALSE, fig.align='center'}
+# SEMPRE read_csv NUNCA read.csv
+clima_tudo = read_csv(
+    here("data/tempo-jp-cg-pt.csv"),
+    col_types = cols(
+        .default = col_double(),
+        cidade = col_character(),
+        semana = col_date(format = ""),
+        ano = col_integer(),
+        mes = col_integer()
+    )
+)
+
+#retirando ano de 2009 do dataset
+clima = clima_tudo %>% filter(ano>=2010)
+```
+
+## Calor
+
+```{r warning=FALSE, message=FALSE, fig.align='center'}
+calor = clima %>% 
+  filter(between(mes, 0, 2)) %>% 
+  mutate(mes=ifelse(mes==1, "Janeiro", "Fevereiro"))
+
+calor %>%
+  ggplot(aes(x=temp_max, y=cidade, colour=mes)) +
+  geom_jitter(height=.1, alpha=.3, size=4) +
+  scale_x_continuous(breaks=seq(28,40,2)) +
+  ggtitle("Gráfico 1 - Temperatura Máxima dos \nmeses de Janeiro e Fevereiro (2010-2019)") +
+  labs(x="Temperatura (ºC)", y="Cidade") +
+  scale_color_manual(name="Mês",
+                     values=c("Janeiro"="blue", "Fevereiro"="red"),
+                     breaks=c("Janeiro", "Fevereiro")) +
+  theme(plot.title=element_text(hjust=0.5))
+
+ggsave("grafico1-original.pdf")
+
+library(scales)
+
+calor %>%
+  ggplot(aes(x=temp_max, y=cidade, colour=mes)) +
+  geom_jitter(height=.25, alpha=.3, size=4) +
+  scale_x_continuous(breaks=seq(28,40,2)) +
+  scale_y_discrete(labels=wrap_format(10)) +
+  ggtitle("Gráfico 1 - Temperatura Máxima dos \nmeses de Janeiro e Fevereiro (2010-2019)\n") +
+  labs(x="\nTemperatura (ºC)", y="Cidade") +
+  scale_color_manual(name="Mês",
+                     values=c("Janeiro"="blue", "Fevereiro"="red"),
+                     breaks=c("Janeiro", "Fevereiro")) +
+  theme(plot.title=element_text(hjust=0.5), text=element_text(size=18))
+
+ggsave("grafico1-organizado.pdf", width=7, height=6)
+```
+
+No Gráfico 1 as temperaturas máximas foram divididas entre as 3 cidades e também agrupadas por cores representando cada mês considerado para a análise, sendo Janeiro e Fevereiro de cada ano desde 2010 até 2019. A distribuição para as temperaturas máximas se manteram em intervalos próximos, de certa forma, de acordo com as cidades, em que é possível perceber:
+
+- João Pessoa, a cidade com menor variação de temperatura máxima, com valores de 30,5º à 34,5º C, e variação de 4º C;
+
+- Patos, se apresentando como a cidade "mais quente" dentre as três, pelo menos visualmente, sendo a menor temperatura máxima ao longo dos anos registrada no mês de Fevereiro por volta de 33,5º C. A variação das temperaturas ficou entre 33,5º e 39º C, cerca de 6º C;
+
+- Campina Grande, por sua vez apresenta as menores tempaturas máximas que as outras cidades, em que nenhuma delas atingiu valores entre 28,5º e 31º C, porém teve uma variação de 28,5º à 34,5º C ao longo dos anos, cerca de 6,5º C, apresentando a maior variação.
+
+```{r warning=FALSE, message=FALSE, fig.align='center'}
+calor = clima %>% 
+  filter(between(mes, 0, 2)) %>% 
+  mutate(mes=ifelse(mes==1, "Janeiro", "Fevereiro"))
+
+calor %>%
+  ggplot(aes(x=temp_media, y=cidade, colour=mes)) +
+  geom_jitter(height=.1, alpha=.3, size=4) +
+  scale_x_continuous(breaks=seq(22,34,2)) +
+  ggtitle("Gráfico 2 - Temperatura Média dos \nmeses de Janeiro e Fevereiro (2010-2019)") +
+  labs(x="Temperatura (ºC)", y="Cidade") +
+  scale_color_manual(name="Mês",
+                     values=c("Janeiro"="deepskyblue3", "Fevereiro"="firebrick1"),
+                     breaks=c("Janeiro", "Fevereiro")) +
+  theme(plot.title=element_text(hjust=0.5))
+```
+
+Utilizando os mesmos estilo gráfico e linha de tempo que o Gráfico 1, ao verificar as Temperaturas Médias destas vez, as visualizações possuem certa semelhança, com Campina Grande atingindo os menores valores, Patos os maiores e João Pessoa como um "meio termo" entre as duas cidades.
+
+É possível perceber também semelhança na variação das Temperaturas alcançadas, sendo Campina Grande e Patos em torno de 6º C e João Pessoa por volta de 4º C.
+
+Com relação aos meses apresentados, ao pegarmos as visualizações dos Gráficos 1 e 2, Janeiro apresentou os menores valores de temperatura, exceto na Temperatura Máxima da cidade de Patos. Porém numa visão geral, na cidade de Patos, Fevereiro se mostrou "menos quente" que Janeiro, visto uma maior porção azul à direita da escala de Temperatura nos dois gráficos, enquanto que para as demais cidades é possível visualizar uma distribuição maior entre os meses, não deixando claro qual mês se mostra como o "mais quente" de fato, apesar de definir algumas suposições já que Janeiro obteve os menores valores na maioria.
+
+```{r warning=FALSE, message=FALSE, fig.align='center'}
+calor %>%
+  ggplot(aes(x=temp_max)) +
+  facet_wrap(~cidade, ncol=3) +
+  geom_histogram(binwidth=.5, color="black", fill="blue", boundary=0) +
+  scale_x_continuous(breaks=seq(28,40,2)) +
+  ggtitle("Gráfico 3 - Temperatura Máxima dos \nmeses de Janeiro e Fevereiro (2010-2019)") +
+  labs(x="Temperatura (ºC)", y="Quantidade") +
+  theme(plot.title=element_text(hjust=0.5))
+
+ggsave('grafico2-original.pdf')
+
+library(scales)
+
+calor %>%
+  ggplot(aes(x=temp_max)) +
+  facet_wrap(~cidade, ncol=3) +
+  geom_histogram(binwidth=1, fill="deepskyblue3", boundary=0, alpha=.7) +
+  scale_x_continuous(breaks=seq(28,40,2)) +
+  labs(title="Gráfico 3 - Temperatura Máxima dos\nmeses de Janeiro e Fevereiro\n(2010-2019)\n", x="\nTemperatura (ºC)", y="Quantidade\n") +
+  theme(text=element_text(size=16), plot.title=element_text(hjust=0.5))
+
+ggsave('grafico2-organizado.pdf', width=7, height=6)
+```
+
+Amostrando a Temperatura Máxima num Histograma, é possível perceber assim como nos Gráficos 1 e 2 que Campina Grande tende a apresentar os menores valores, embora sua distribuição esteja próxima dos valores de João Pessoa, com tendência para uma temperatura de 33º C, enquanto que Patos apresenta realmente os maiores valores com tendências em 33º e 38º C, isto se levarmos em conta uma escala entre 28º à 40º C.
+
+Com base nas visualizações apresentadas, podemos sugerir de acordo com as temperaturas que Patos seja a cidade mais quente entre Janeiro e Fevereiro, e que Campina Grande é a cidade menos quente, embora apresente temperaturas equiparáveis com Patos em determinados momentos. Quanto a João Pessoa, dependendo do período e da cidade comparatória, ela pode ser uma cidade amena em relação a Patos e uma cidade mais quente em relação a Campina Grande. (P2)
+
+## Umidade
+
+```{r warning=FALSE, message=FALSE, fig.align='center'}
+umidade_ar = clima
+
+umidade_ar %>% 
+  filter(ano==2019) %>% 
+  ggplot(aes(x=semana, y=umidade, colour=cidade)) +
+  scale_y_continuous(breaks=seq(35,95,5)) +
+  geom_step() +
+  scale_x_date(date_breaks="1 month", date_labels = "%b") +
+  ggtitle("Gráfico 4 - Umidade do Ar Semanal (2019)") +
+  labs(x="Mês", y="Porcentagem (%)") +
+  theme(plot.title=element_text(hjust=0.5)) +
+  scale_colour_discrete("Cidade")
+```
+
+Caso o que de fato a Umidade do Ar representa não seja tão conhecido, ela se refere a quantidade de vapor de água na atmosfera terrestre. Fisicamente falando, é uma razão da quantidade de vapor de água presente em uma parte da atmosfera com a quantidade máxima de vapor que a atmosfera pode suportar em uma temperatura específica.
+
+No Gráfico 4, é colocada em evidência a umidade média semanal durante o ano de 2019 das três cidades paraibanas. Nota-se que Patos obteve a menor Umidade para todos os meses do ano, o que pode comprovar ainda mais que seja de fato a cidade mais quente entre as três, uma vez que quanto menor a Umidade do Ar, maior a taxa evaporativa de suor, dando a sensação de maior calor.
+
+Campina Grande e João Pessoa se mantem com uma Umidade maior em relação a Patos, sendo Campina apresentando maiores valores em boa parte do ano, de Janeiro até meados de Novembro, que a partir daí João Pessoa ultrapassa.
+
+É curioso ainda notar a variação da Umidade em um único mês. Se reparar em Julho na cidade de Patos, por exemplo, ela iniciou o mês em cerca de 51%, atingindo 66% na terceira semana e encerrando o mês com cerca de 58%. Uma provável explicação para esta variação, pode ser a quantidade de chuvas que a cidade teve na terceira semana, cerca de 11mm, bem acima do início do mês que não foram registradas chuvas.
+
+```{r warning=FALSE, message=FALSE, fig.align='center'}
+umidade_ar %>%
+  filter(cidade=="Patos", ano>=2010, ano<=2019) %>% 
+  ggplot(aes(x=semana, y=umidade)) +
+  geom_step(color="deepskyblue3") +
+  scale_x_date(date_breaks="1 month", date_labels = "%b") +
+  facet_wrap(~ano, ncol=2, scales="free") +
+  ggtitle("Gráfico 5 - Umidade do Ar Semanal em Patos (2010-2019)") +
+  labs(x="Mês", y="Porcentagem (%)") +
+  theme(plot.title=element_text(hjust=0.5))
+```
+
+Ao visualizar a distribuição em linha da Umidade ao longo dos anos, é perceptível um certo padrão de forma geral, em que a Umidade no primeiro semestre possui valores maiores que no segundo semestre de cada ano, além de evidenciar certos picos após ocorrência no primeiro trimestre, no segundo trimestre entre os meses de Maio e Agosto, como podem ser notados nos anos de 2010, 2012, 2013, 2015 e 2019 no Gráfico 5. (P3)
+
+## Festas Juninas
+
+```{r warning=FALSE, message=FALSE, fig.align='center'}
+junho = clima %>% 
+  filter(ano<=2019, ano>=2010, mes==6)
+
+junho %>%
+  ggplot(aes(x = ano, y = temp_media, group = ano, color=cidade)) +
+  facet_wrap(~cidade, ncol=1) +
+  geom_boxplot(width = .5, coef = 1000) +
+  scale_x_continuous(breaks=seq(2010,2019)) +
+  ggtitle("Gráfico 6 - Temperatura Média \nem Junho (2010-2019)") +
+  labs(x="Ano", y="Temperatura (ºC)") +
+  theme(plot.title=element_text(hjust=0.5)) +
+  scale_colour_discrete("Cidade")
+```
+
+O Gráfico 6 agrupa a Temperatura Média do mês de Junho ao longo dos anos, que para o mês dos festejos juninos, temos Campina Grande apresentando as menores temperaturas para curtir um bom forró no frio, já que ao longo dos anos não ultrapassou a casa dos 26º C. Para quem prefere um clima ameno, João Pessoa e Patos podem ser melhores opções, que de acordo com a temperatura média no mês, as cidades atingem valores entre 25º e 29º C. (P4)
+
+```{r warning=FALSE, message=FALSE, fig.align='center'}
+junho %>% 
+  filter(cidade!="Patos") %>% 
+  ggplot(aes(x=chuva, fill=cidade)) +
+  geom_density(alpha=0.3) +
+  ggtitle("Gráfico 7 - Índice Pluviométrico \nde Junho (2010-2019)") +
+  labs(x="Milímetros (mm)", y="Densidade") +
+  theme(plot.title=element_text(hjust=0.5)) +
+  scale_fill_discrete(name="Cidade")
+```
+
+Comparando a densidade do índice pluviométrico de Campina Grande e João Pessoa no Gráfico 7, é perceptível uma concentração maior de chuvas entre 0 e 50mm na cidade de Campina Grande, com um segundo pico por volta dos 140mm, a maior chuva registrada no período. Em contra-partida, a cidade de João Pessoa apresenta um único pico de densidade entre 0 e 100mm, com uma calda que se prolonga até quase 300mm, indicando que as chuvas que ocorrem na cidade, tendem a ser mais volumosas, inclusive apresentando um indice por volta dos 400mm em determinado momento.
+
+```{r warning=FALSE, message=FALSE, fig.align='center'}
+junho_chuva_agrupada = junho %>% 
+  filter(cidade!="Patos") %>%
+  group_by(ano, cidade) %>%
+  summarise(media_chuva=mean(chuva))
+
+junho_chuva_agrupada %>% 
+  filter(cidade!="Patos") %>%
+  ggplot(aes(x=ano, y=media_chuva, color=cidade)) +
+  geom_line() + geom_point() +
+  scale_x_continuous(breaks=seq(2010,2019,1),
+                     minor_breaks=seq(2010,2019,2)) +
+  scale_y_continuous(breaks=seq(0,200,25)) +
+  ggtitle("Gráfico 8 - Média Pluviométrica \nde Junho (2010-2019)") +
+  labs(x="Ano", y="Milímetros (mm)") +
+  theme(plot.title=element_text(hjust=0.5)) +
+  scale_colour_discrete("Cidade")
+```
+
+Caso o gráfico de densidade pareça confuso, é possível perceber um maior índice pluviométrico de João Pessoa em relação a Campina Grande no Gráfico 8, em que a média das chuvas de Junho é apresentada numa escala milimétrica separada pelos anos, evidenciando um maior volume de chuvas na capital paraibana. Se você é uma pessoa que gosta de chuva ou prefere festejar sem se molhar, já tem uma ideia de qual destino  pode escolher. (P4)

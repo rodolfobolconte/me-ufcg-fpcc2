@@ -1,0 +1,167 @@
+---
+title: "L5P3 - Regressão romântica"
+author: Rodolfo Bolconte
+date: 24/06/21
+output:
+    word_document: default
+    html_document:
+        rmdformats::readthedown
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      warning=FALSE, message=FALSE,
+                      fig.width = 8,
+                      fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+theme_set(theme_bw())
+library(boot)
+library(broom)
+library(grid)
+library(gridExtra)
+library(quantreg)
+library(scales)
+library(reshape2)
+library(pscl)
+```
+
+Neste problema, utilizaremos dados românticos descritos e disponíveis aqui: https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating
+
+Especialmente, atente para uma coluna chamada `dec`, que diz se houve match entre os dois participantes do encontro -- isso é: ambos disseram que gostariam de se encontrar novamente depois: https://github.com/nazareno/ciencia-de-dados-1/blob/master/5-regressao/speed-dating/speed-dating2.csv
+
+Sua missão é utilizar regressão logística em um conjunto de variáveis explicativas que você escolher (com no mínimo 4 variáveis e sem usar as variáveis like e prob) para responder o seguinte com esses dados em um RMarkdown:
+
+Que fatores nos dados têm efeito relevante na chance do casal ter um match? Descreva se os efeitos são positivos ou negativos e sua magnitude.
+
+Lembre que temos apenas uma amostra de encontros. Faça inferência para suas conclusões. 
+
+Lembre de fazer um descritivo das variáveis antes, e de escrever o relatório de maneira que alguém que saiba sobre regressão mas não sabe nada sobre os dados entenda.
+
+
+## Carregamento dos Dados
+
+O repositório com os dados: https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating
+
+```{r}
+dataset = read_csv(here::here("data/speed-dating2.csv"))
+```
+
+```{r}
+glimpse(dataset)
+```
+
+## Análise Exploratória de Dados
+
+Como o propósito da atividade é selecionar variáveis explicativas do conjunto de dados original para descobrir o efeito na ocorrência de match em encontros, foram selecionadas 5 variáveis, sendo elas:
+
+- attr: quão atraente p1 achou p2
+- sinc: quão sincero p1 achou p2
+- intel: quão inteligente p1 achou p2
+- fun: quão divertido p1 achou p2
+- amb: quão ambicioso p1 achou p2
+
+Em que p1 é o primeiro participante do encontro e p2 é o segundo participante.
+
+```{r}
+variaveis_descritivas = dataset %>%
+  filter(attr!="NA", sinc!="NA", intel!="NA", fun!="NA", amb!="NA", dec!="NA") %>% 
+  select(iid, attr, sinc, intel, fun, amb, dec)
+
+count(variaveis_descritivas)
+count(variaveis_descritivas %>% group_by(dec))
+```
+
+```{r}
+atributos_yes = melt(filter(variaveis_descritivas, dec=="yes"), id.vars = 'iid',
+                       measure.vars=c("attr", "sinc", "intel", "fun", "amb"))
+
+atributos_no = melt(filter(variaveis_descritivas, dec=="no"), id.vars = 'iid',
+                       measure.vars=c("attr", "sinc", "intel", "fun", "amb"))
+```
+
+
+```{r fig.cap="Gráfico 1: Distribuição das avaliações para cada variável separadas por encontros que deram certo ou não."}
+grafico_yes = atributos_yes %>% 
+  ggplot(aes(value, variable)) +
+  geom_jitter(alpha=.2, height=.3, color='chartreuse3') +
+  geom_boxplot(fill=.01, coef = 1000) +
+  scale_x_continuous(breaks=seq(0,10,1)) +
+  theme(text=element_text(size=16)) +
+  labs(x=NULL, y='', subtitle = "Match = Yes")
+
+grafico_no = atributos_no %>% 
+  ggplot(aes(value, variable)) +
+  geom_jitter(alpha=.2, height=.3, color='red') +
+  geom_boxplot(fill=.01, coef = 1000) +
+  scale_x_continuous(breaks=seq(0,10,1)) +
+  theme(text=element_text(size=16)) +
+  labs(x=NULL, y='', subtitle = "Match = No")
+  
+grid.arrange(grafico_yes, grafico_no,
+             left = textGrob("Variáveis",
+                               gp = gpar(fontsize=16), r=90),
+             bottom = textGrob("Valor",
+                               gp = gpar(fontsize=16)))
+```
+
+O Conjunto de Dados original possui 4918 amostras de encontros, porém para a análise foram retiradas amostras que tenham pelo menos uma variável com valor inexistentes (NA), sendo assim, o número total de amostras utilizadas para a análise foi de 4451, sendo 1866 amostras de encontro que deram certo e 2585 amostras de encontro que não deram certo.
+
+Através do Gráfico 1, é possível visualizar que para encontros que deram certo, há pouco valores abaixo de 5 para as variáveis, visto que pela coloração do gráfico, há uma presença maior de valores acima de 5. Na variável intel, que representa o quanto o primeiro participante achou o segundo participante inteligente, apresenta o menor intervalo de avaliações, de 3 a 10, com metade dos valores se concentrando entre 8 e 10, o que pode ser uma ótima variável que explique um encontro dar certo.
+
+Para encontros que não deram certo, todas as variáveis possuem avaliações entre 0 e 10, sendo attr (quão o primeiro participante achou o segundo participante atraente), a variável com uma concentração de valores de avaliações baixa, entre 4 e 6.
+
+## Questão de Atividade
+
+- Que fatores nos dados têm efeito relevante na chance do casal ter um match? Descreva se os efeitos são positivos ou negativos e sua magnitude.
+
+```{r}
+variaveis_descritivas = variaveis_descritivas %>% mutate(dec=if_else(dec=='yes', 1, 0))
+
+modelo = glm(dec ~ attr + sinc + intel + fun + amb, variaveis_descritivas, family="binomial")
+
+estimativas = tidy(modelo, conf.int=T) %>% 
+  select(-statistic, -p.value)
+
+estimativas
+```
+
+Para responder a questão, foi realizada a criação de um modelo de regressão logística utilizando 5 variáveis (attr, sinc, intel, fun, amb) para tentar explicar quando um encontro dá certo ou não, através da variável categórica "dec". Com o modelo de regressão criado, foi utilizado o odds (chance) para que o efeito das variáveis explicativas seja analisado em relação à variável de resposta. Sendo assim, o modelo gerou a seguinte equação do nível de chance para cada coeficiente:
+
+$$p(dec) = e^{-4,97} \times e^{0,57 \times attr}
+  \times e^{0,57 \times attr}
+  \times e^{-0,08 \times sinc}
+  \times e^{0,01 \times intel}
+  \times e^{0,36 \times fun}
+  \times e^{-0,12 \times amb}$$
+
+O coeficiente de multiplicação para a variável attr (quão atraente p1 achou p2) atingiu o maior valor, de 0,57, sendo assim, se aumentar o valor do atributo attr em uma unidade, aumenta em 57% a chance do primeiro participante achar o segundo um pouco mais atraente. Essa mesma lógica segue para a variável com o segundo maior coeficiente, fun (quão divertido p1 achou p2), com valor de 0,36. Com relação aos coeficientes negativos, a variável amb (quão ambicioso p1 achou p2) atingiu o menor valor, em torno de -0,12, sendo assim, quando o valor da variável aumenta em uma unidade (quando p1 acha p2 mais ambicioso), diminui a chance do encontro dar certo em 12%. Os coeficientes das variáveis intel (quão inteligente p1 achou p2) e sinc (quão sincero p1 achou p2) atingiram valores baixos, alterando as chances de o encontro dar certo por volta de 8% e 1% respectivamente.
+
+```{r fig.cap="Gráfico 2: Intervalos de Confiança dos coeficientes das variáveis explicativas analisadas."}
+estimativas %>% filter(term != "(Intercept)") %>% 
+  ggplot(aes(y=reorder(term, conf.low))) +
+  geom_errorbar(aes(xmin=conf.low, xmax=conf.high), width=.3) +
+  geom_point(aes(x=estimate), size=3) +
+  geom_vline(xintercept=0) +
+  geom_vline(xintercept=.3, lty=2) +
+  geom_vline(xintercept=-.3, lty=2) +
+  theme(text=element_text(size=16)) +
+  labs(x='\nEstimativa', y='Variáveis\n')
+```
+
+No Gráfico 2 é possível visualizar os intervalos de confiança do odds para os coeficientes das variáveis, sendo intel a variável com o coeficiente que não é possível inferir se terá efeito ou não no odds do encontro dar certo, enquanto os coeficientes de fun e attr se mostraram altos, indicando um maior efeito no impacto do odds para os encontros, sendo attr atingindo o maior valor de intervalo, até 0,62, ou 62%.
+
+```{r}
+pscl::pR2(modelo)
+```
+
+Por fim temo o valor do pseudo $R^2$, em que se baseando no valor de McFadden, o modelo é capaz de explicar cerca de 22,7% da variação da variável de resposta, no caso a variável dec, quando utilizando apenas as 5 variáveis apresentadas anteriormente.

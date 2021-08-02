@@ -1,0 +1,256 @@
+---
+title: "L4P2 - Exercícios com Testes de Hipótese"
+author: Rodolfo Bolconte
+date: 26/05/21
+output:
+    word_document: default
+    html_document:
+        rmdformats::readthedown
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      #warning=FALSE, message=FALSE,
+                      fig.width = 8,
+                      fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+theme_set(theme_bw())
+library(boot)
+library(broom)
+library(grid)
+library(gridExtra)
+library(quantreg)
+library(scales)
+```
+
+## Um Experimento com Sorrisos
+
+Neste cenário, estamos estudando dados sobre como ver uma pessoa sorrindo muda o julgamento que temos dela. Os dados são de um experimento que mostrava para uma amostra de participantes 1 de quatro fotos, 3 das quais tem um sorriso e uma que não tem.
+
+Essa foto era acompanhada de um texto que descrevia que a pessoa na foto era suspeita de ter plagiado um trabalho na universidade. Depois de ver a foto, as pessoa devem responder o quanto suspeitam ou não da pessoa retratada. O valor da coluna leniency é um índice feito de respostas para 5 perguntas em uma escala de 0 a 9. Ela mede o quão leniente foi o julgamento das pessoas. Repare que se apenas um sorriso causar alguma mudança, isso é impressionante. Por isso uma diferença de meio ponto já é considerada relevante.
+
+(O estudo completo é esse, caso você tenha interesse: LaFrance, M., & Hecht, M. A. (1995) Why smiles generate leniency. Personality and Social Psychology Bulletin, 21, 207-214.)
+
+```{r}
+q1_dados = read_csv(here::here("data/leniency.csv"), 
+                 col_types = "cdc")
+```
+
+### Questões
+
+**1- Ter a pessoa sorrindo na foto (independente do sorriso) causa uma mudança no julgamento das pessoas em geral?**
+
+```{r}
+q1_theta_chapeu <- function(dados) {
+  medias = dados %>% 
+    group_by(with_smile) %>% 
+    summarise(media=mean(leniency))
+  
+  smile = medias %>% filter(with_smile=="yes") %>% pull(media)
+  nosmile = medias %>% filter(with_smile=="no") %>% pull(media)
+  
+  smile - nosmile
+}
+
+q1_amostra_theta_chapeu = round(q1_theta_chapeu(q1_dados),3)
+```
+
+```{r}
+q1_theta_nulo <- function(dados) {
+  random = dados %>% 
+    mutate(leniency_random=sample(leniency, n()))
+
+  medias = random %>%
+    group_by(with_smile) %>%
+    summarise(media_populacao=mean(leniency_random))
+
+  smile = medias %>% filter(with_smile=="yes") %>% pull(media_populacao)
+  nosmile = medias %>% filter(with_smile=="no") %>% pull(media_populacao)
+  
+  smile - nosmile
+}
+
+q1_populacao_theta_nulo = replicate(5000, q1_theta_nulo(q1_dados))
+```
+
+```{r fig.cap="Gráfico 1.1: Distribuição da população gerada pelo Modelo Nulo a partir da amostra original, sendo amostrada através de um Histograma, com valores de Theta Chapéu (TC) de referência para o quanto as amostras geradas pelo modelo  podem gerar diferenças de média de leniência maiores ou menores."}
+q1_p_value = sum(abs(q1_populacao_theta_nulo) >= abs(q1_amostra_theta_chapeu)) / length(q1_populacao_theta_nulo)
+
+tibble(media=q1_populacao_theta_nulo) %>%
+  ggplot(aes(media)) +
+  geom_histogram(binwidth=.2, alpha=.1, color='blue', fill='blue') +
+  geom_vline(xintercept=q1_amostra_theta_chapeu, color='red') +
+  geom_vline(xintercept=-q1_amostra_theta_chapeu, color='red') +
+  annotate("label", x=-1.25, y=1150, hjust=0, vjust=1,
+           label=paste("p-value:", round(q1_p_value,3), "\nTC: [", -q1_amostra_theta_chapeu, ",", q1_amostra_theta_chapeu, "]")) +
+  labs(x=paste('\nModelo Nulo entre Imagens com Sorriso e Sem Sorriso'), y='Quantidade\n') +
+  theme(text=element_text(size=16))
+```
+
+Para responder esta questão, foi calculado o Theta Chapéu (TC) da diferença média de leniência para fotos com sorriso e sem sorriso, após isso, os valores de leniência para as imagens com e sem sorrisos foram reamostrados de forma aleatória entre as linhas de dados, sendo, assim valores de um determinado tipo de sorriso pode ter sido associado a outro tipo ou a si mesmo, sempre de forma aleatória. Com isto, foram gerados 5000 amostras para a população que representa o Modelo Nulo, afim de realizar o Teste de Hipótese.
+
+A distribuição da população do Modelo Nulo pode ser conferida no Gráfico 1.1, utilizando o valor do TC como referencial para indicar a quantidade de amostras maiores e menores em relação à amostra original. A partir do TC da amostra original, foi calculado o p-value entre a amostra e o modelo nulo, em que atingiu o valor de 0,003. Se levarmos em consideração um valor alpha de 0,05, é plausível que a diferença da amostra para com o modelo nulo tem significância.
+
+
+**2- Como se comparam os efeitos dos diferentes sorrisos no julgamento das pessoas?**
+```{r}
+q1_theta_chapeu_categ <- function(dados, tipo1, tipo2) {
+  medias = dados %>% 
+    group_by(smile) %>% 
+    summarise(media=mean(leniency))
+  
+  smile1 = medias %>% filter(smile==tipo1) %>% pull(media)
+  smile2 = medias %>% filter(smile==tipo2) %>% pull(media)
+  
+  smile1 - smile2
+}
+```
+
+```{r}
+q1_theta_nulo_categ <- function(dados, tipo1, tipo2) {
+  random = dados %>% 
+    #filter(smile %in% c(tipo1, tipo2)) %>% 
+    mutate(leniency_random=sample(leniency, n()))
+
+  medias = random %>%
+    group_by(smile) %>%
+    summarise(media_random=mean(leniency_random))
+
+  smile1 = medias %>% filter(smile==tipo1) %>% pull(media_random)
+  smile2 = medias %>% filter(smile==tipo2) %>% pull(media_random)
+
+  smile1 - smile2
+}
+```
+
+```{r}
+q1_grafico_distribuicao_categ <- function(dados, tipo1, tipo2, theta_chapeu_grafico, p_value, xleg, yleg, subtitulo) {
+  dados %>%
+    ggplot(aes(media)) +
+    geom_histogram(binwidth=.2, alpha=.1, color='blue', fill='blue') +
+    geom_vline(xintercept=theta_chapeu_grafico, color='red') +
+    geom_vline(xintercept=-theta_chapeu_grafico, color='red') +
+    annotate("label", x=xleg, y=yleg, hjust=0, vjust=1,
+             label=paste("p-value:", p_value, "\nTC: [", -theta_chapeu_grafico, ",", theta_chapeu_grafico, "]")) +
+    labs(x=paste(tipo1, 'e', tipo2), y='', subtitle=subtitulo) +
+    scale_x_continuous(breaks=c(-1,0,1)) +
+    theme(text=element_text(size=14))
+}
+```
+
+```{r}
+q1_executa_comparacao <- function(dados, tipo1, tipo2, subtitulo) {
+  q1_amostra_theta_chapeu_categ = q1_theta_chapeu_categ(dados, tipo1, tipo2)
+  q1_populacao_theta_nulo_categ = replicate(5000, q1_theta_nulo_categ(dados, tipo1, tipo2))
+  q1_p_value_categ = sum(abs(q1_populacao_theta_nulo_categ) >= abs(q1_amostra_theta_chapeu_categ)) / length(q1_populacao_theta_nulo_categ)
+  #q1_p_value_categ
+  q1_grafico_distribuicao_categ(tibble(media=q1_populacao_theta_nulo_categ),
+                              tipo1, tipo2,
+                              round(q1_amostra_theta_chapeu_categ,3),
+                              round(q1_p_value_categ, 3),
+                              -1.5, 1000, subtitulo)
+}
+
+graf_fal_fel = q1_executa_comparacao(q1_dados, "false smile", "felt smile", "(a)")
+graf_fal_mis = q1_executa_comparacao(q1_dados, "false smile", "miserable smile", "(b)")
+graf_fel_mis = q1_executa_comparacao(q1_dados, "felt smile", "miserable smile", "(c)")
+```
+
+```{r fig.cap="Gráfico 1.2: Distribuição da população gerada pelo Modelo Nulo a partir da amostra original, dividida por comparação de sorrisos, sendo (a) false com felt smile, (b) false com miserable smile e (c) felt com miserable smile."}
+grid.arrange(graf_fal_fel,graf_fal_mis,graf_fel_mis, ncol=1,
+             bottom = textGrob("Modelo Nulo entre Sorrisos",
+                               gp = gpar(fontsize=16)),
+             left = textGrob("Quantidade", rot=90,
+                               gp = gpar(fontsize=16)))
+```
+
+No Gráfico 1.2 é mostrada a distribuição das amostras da população gerada pelo Modelo Nulo em histogramas, sendo separadas por comparação entre os diferentes tipos de sorrisos. Em (a), tem-se a comparação de false e felt smile que possui um valor TC de 0,456 e um p-value de 0,275, que levando em consideração um valor alpha de significância de 0,05, a amostra não possui diferença significante, ou seja, ela pode ser gerada a partir do Modelo Nulo. O mesmo acontece em (b), com o mesmo valor de TC, embora p-value seja 0,28, evidenciando nenhuma diferença significante entre a amostra e o modelo nulo.
+
+Em (c), temos o TC de valor 0 e p-value 1, isto significa que a amostra não possui diferença das amostras geradas pelo Modelo Nulo, uma vez que seus valores dentro das 5000 amostras da população do Modelo Nulo são semelhantes.
+
+## Relação entre SAT e GPA
+
+Nesse cenário, usaremos dados de resultados de duas avaliações feitas em alunos que se formaram em Computação em uma universidade pública americana.
+
+O primeiro é o SAT: "O exame SAT é um teste padronizado que a maioria das faculdades dos EUA usa para determinar se os alunos devem ser aceitos na instituição." e nossos dados tem a nota em matemática (math_SAT) e expressão verbal (verb_SAT) no SAT dos estudantes.
+
+A segunda nota disponível é a GPA dos alunos, que você pode interpretar como um agregado do desempenho deles no curso. Temos o GPA deles para as matérias de computação (comp_GPA) e no geral (univ_GPA).
+
+### Carregamento e Análise Exploratória dos Dados
+
+```{r}
+q2_dados = read_csv(here::here("data/sat-gpa.csv"), 
+                 col_types = "dddd")
+```
+
+```{r}
+q2_theta_chapeu_cor <- function(dados, col) {
+  
+  cor(dados$comp_GPA, dados[[col]], method='pearson')
+}
+
+q2_theta_chapeu_cor_math = q2_theta_chapeu_cor(q2_dados, "math_SAT")
+q2_theta_chapeu_cor_verb = q2_theta_chapeu_cor(q2_dados, "verb_SAT")
+```
+
+```{r}
+q2_theta_nulo_cor <- function(dados, col) {
+  
+  random = dados %>% 
+    mutate(comp_GPA_random = sample(comp_GPA, n()))
+  
+  cor(random$comp_GPA_random, random[[col]], method='pearson')
+}
+
+q2_populacao_theta_nulo_math = replicate(5000, q2_theta_nulo_cor(q2_dados, "math_SAT"))
+q2_p_value_math = sum(abs(q2_populacao_theta_nulo_math) >= abs(q2_theta_chapeu_cor_math)) / length(q2_populacao_theta_nulo_math)
+
+q2_populacao_theta_nulo_verb = replicate(5000, q2_theta_nulo_cor(q2_dados, "verb_SAT"))
+q2_p_value_verb = sum(abs(q2_populacao_theta_nulo_verb) >= abs(q2_theta_chapeu_cor_verb)) / length(q2_populacao_theta_nulo_verb)
+```
+
+```{r}
+q2_grafico_distribuicao <- function(dados, col, theta_chapeu_grafico, p_value, xleg, yleg, subtitulo) {
+  dados %>%
+    ggplot(aes(media)) +
+    geom_histogram(binwidth=.2, alpha=.1, color='blue', fill='blue') +
+    geom_vline(xintercept=theta_chapeu_grafico, color='red') +
+    geom_vline(xintercept=-theta_chapeu_grafico, color='red') +
+    annotate("label", x=xleg, y=yleg, hjust=0, vjust=1,
+             label=paste("p-value:", p_value, "\nTC: [", -theta_chapeu_grafico, ",", theta_chapeu_grafico, "]")) +
+    labs(x=paste('\n', col), y='', subtitle=subtitulo) +
+    scale_x_continuous(breaks=c(-1,-theta_chapeu_grafico,0,theta_chapeu_grafico,1)) +
+    theme(text=element_text(size=16))
+}
+
+grafico_math = q2_grafico_distribuicao(tibble(media=q2_populacao_theta_nulo_math),
+                        "Matemática", 
+                        round(q2_theta_chapeu_cor_math,3),
+                        q2_p_value_math,
+                        -round(q2_theta_chapeu_cor_math,3), 3000, '(a)')
+
+grafico_verb = q2_grafico_distribuicao(tibble(media=q2_populacao_theta_nulo_verb),
+                        "Expressão Verbal", 
+                        round(q2_theta_chapeu_cor_verb,3),
+                        q2_p_value_verb,
+                        -round(q2_theta_chapeu_cor_verb,3), 3000, '(b)')
+```
+
+```{r fig.cap="Gráfico 2.1: Amostragem utilizando Histogramas da população do Modelo Nulo a partir de amostras da correlação entre o Curso de Computação com as Disciplinas de (a) Matemática e (b) Expressão Verbal."}
+grid.arrange(grafico_math, grafico_verb, ncol=2,
+             bottom = textGrob("\nModelo Nulo entre Computação e Disciplinas",
+                               gp = gpar(fontsize=16)),
+             left = textGrob("Quantidade", rot=90,
+                               gp = gpar(fontsize=16)))
+
+```
+
+Nesta questão, foi calculada a correlação de Pearson entre o curso de Computação com as disciplinas de Matemática e Expressão Verbal, devido a linearidade analisa em atividade anterior.
+
+De acordo com o Gráfico 2.1, em que a diferença do coeficiente de correlação das amostras da população geradas pelo Modelo Nulo, são amostradas em um histograma, tem-se o TC entre Matemática e Computação em (a), em torno de 0.688 positivo e negativo, e um p-value de 0, evidenciando que todas as amostras geradas pelo Modelo Nulo não possuem valor do coeficiente de correlação de Pearson maior que a correlação da amostra original, e se considerarmos um valor alpha de significância de 0,05, fica clara a diferença significante da amostra original com relação ao modelo nulo, sendo assim a hipótese nula rejeita.
+
+O mesmo acontece em (b), comparação o curso de Computação com a Expressão Verbal, porém com um valor de TC menor que Matemática, em torno de 0,639, mas com p-value em 0, exaltando também a diferença significante da amostra original com a população gerada e também recusando a hipótese nula.

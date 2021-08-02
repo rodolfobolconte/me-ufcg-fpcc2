@@ -1,0 +1,121 @@
+"0","alcool = read_csv(here::here(""data/alcool.csv""))"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m---------------------------------------------------------------------------------[39m
+cols(
+  SEQN = [32mcol_double()[39m,
+  ALQ101 = [32mcol_double()[39m,
+  ALQ110 = [32mcol_double()[39m,
+  ALQ120Q = [32mcol_double()[39m,
+  ALQ120U = [32mcol_double()[39m,
+  ALQ130 = [32mcol_double()[39m,
+  ALQ141Q = [32mcol_double()[39m,
+  ALQ141U = [32mcol_double()[39m,
+  ALQ151 = [32mcol_double()[39m,
+  ALQ160 = [32mcol_double()[39m
+)
+
+"
+"0","caloria = read_csv(here::here(""data/caloria.csv""))"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m---------------------------------------------------------------------------------[39m
+cols(
+  .default = col_character(),
+  SEQN = [32mcol_double()[39m,
+  WTDRD1 = [32mcol_double()[39m,
+  DR1DRSTZ = [32mcol_double()[39m,
+  DRABF = [32mcol_double()[39m,
+  DRDINT = [32mcol_double()[39m,
+  DR1DBIH = [32mcol_double()[39m,
+  DR1DAY = [32mcol_double()[39m,
+  DR1LANG = [32mcol_double()[39m,
+  DR1MRESP = [32mcol_double()[39m,
+  DR1HELP = [32mcol_double()[39m,
+  DBQ095Z = [32mcol_double()[39m,
+  DBD100 = [32mcol_double()[39m,
+  DRQSPREP = [32mcol_double()[39m,
+  DR1STY = [32mcol_double()[39m,
+  DR1SKY = [32mcol_double()[39m,
+  DRQSDIET = [32mcol_double()[39m,
+  DRQSDT1 = [32mcol_double()[39m,
+  DRQSDT2 = [32mcol_double()[39m,
+  DRQSDT3 = [32mcol_double()[39m,
+  DRQSDT4 = [32mcol_double()[39m
+  # ... with 57 more columns
+)
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m for the full column specifications.
+
+"
+"2","8562 parsing failures.
+row col    expected      actual                                                      file
+  1  -- 168 columns 211 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/caloria.csv'
+  2  -- 168 columns 211 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/caloria.csv'
+  3  -- 168 columns 211 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/caloria.csv'
+  4  -- 168 columns 210 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/caloria.csv'
+  5  -- 168 columns 208 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/caloria.csv'
+... ... ........... ........... .........................................................
+See problems(...) for more details.
+"
+"0","diabetes = read_csv(here::here(""data/diabetes.csv""))"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m---------------------------------------------------------------------------------[39m
+cols(
+  .default = col_double()
+)
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m for the full column specifications.
+
+"
+"2","269 parsing failures.
+row col   expected     actual                                                       file
+  1  -- 54 columns 55 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/diabetes.csv'
+ 24  -- 54 columns 55 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/diabetes.csv'
+ 33  -- 54 columns 55 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/diabetes.csv'
+174  -- 54 columns 55 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/diabetes.csv'
+178  -- 54 columns 55 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/diabetes.csv'
+... ... .......... .......... ..........................................................
+See problems(...) for more details.
+"
+"0","fumante = read_csv(here::here(""data/fumante.csv""))"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m---------------------------------------------------------------------------------[39m
+cols(
+  .default = col_double(),
+  SMDUPCA = [31mcol_character()[39m,
+  SMD100BR = [31mcol_character()[39m
+)
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m for the full column specifications.
+
+"
+"2","683 parsing failures.
+row col   expected     actual                                                      file
+  7  -- 42 columns 43 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/fumante.csv'
+ 12  -- 42 columns 43 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/fumante.csv'
+ 25  -- 42 columns 43 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/fumante.csv'
+ 80  -- 42 columns 43 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/fumante.csv'
+ 97  -- 42 columns 43 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/fumante.csv'
+... ... .......... .......... .........................................................
+See problems(...) for more details.
+"
+"0","imc = read_csv(here::here(""data/imc.csv""))"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m---------------------------------------------------------------------------------[39m
+cols(
+  .default = col_double()
+)
+[36mi[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m for the full column specifications.
+
+"
+"2","9517 parsing failures.
+row col   expected     actual                                                  file
+  1  -- 26 columns 36 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/imc.csv'
+  2  -- 26 columns 34 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/imc.csv'
+  3  -- 26 columns 34 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/imc.csv'
+  4  -- 26 columns 35 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/imc.csv'
+  5  -- 26 columns 32 columns 'A:/Downloads/fpcc2/replicacao-diabetes/data/imc.csv'
+... ... .......... .......... .....................................................
+See problems(...) for more details.
+"
+"0","alcool = alcool %>% select(SEQN, ALQ130)"
+"0","caloria = caloria %>% select(SEQN, DRQSDT1)"
+"0","diabetes = diabetes %>% select(SEQN, DIQ175J,DIQ175H,DIQ175D,DIQ175G, DIQ010)"
+"0","fumante = fumante %>% select(SEQN, SMD650)"
+"0","imc = imc %>% select(SEQN, BMXBMI)"

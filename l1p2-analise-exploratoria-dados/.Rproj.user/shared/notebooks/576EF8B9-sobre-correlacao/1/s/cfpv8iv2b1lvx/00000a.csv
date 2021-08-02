@@ -1,0 +1,4 @@
+"0","estimativas_raw = read_projectdata()"
+"2","Error in cols(.default = col_character(), Priority = col_double(), HoursEstimate = col_double(),  : 
+  não foi possível encontrar a função ""cols""
+"

@@ -1,0 +1,203 @@
+---
+title: "Correlações no SIP Dataset"
+author: Rodolfo Bolconte
+date: 18/04/20
+output:
+    rmdformats::readthedown
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      #fig.width = 7,
+                      #fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+source(here::here("code/lib.R"))
+theme_set(theme_bw())
+
+estimativas_raw = read_projectdata()
+#glimpse(estimativas_raw)
+```
+
+## O que são os dados
+
+Conjunto de dados com informações de 12299 tarefas realizadas por 22 desenvolvedores em 20 códigos de projeto utilizando metodologia ágil.
+
+
+## Entendendo os dados
+
+```{r}
+estimativas_raw %>% 
+    summarise(
+        projetos = n_distinct(project_code), 
+        categoprias = n_distinct(category), 
+        sub_categorias = n_distinct(sub_category), 
+        estimativas = n(), 
+        tasks = n_distinct(task_number), 
+        prioridades = n_distinct(priority)
+    )
+```
+
+Temos 20 projetos, com 12299 estimativas de tempo para tasks. Não há apenas uma estimativa por tarefa, já que há apenas 10266 valores distintos de `task_number`.
+
+```{r}
+estimativas_raw %>% 
+    count(task_number, category, summary, sort = T)
+```
+
+
+### Dados com uma estimativa por task
+
+Para nossa análise, usaremos uma estimativa por task. Caso haja mais de uma usaremos a média das `estimativas_raw`.
+
+```{r}
+por_task = estimativas_raw %>%
+    group_by(project_code, task_number, category, sub_category, priority, summary) %>%
+    summarise(
+        hours_estimate = mean(hours_estimate),
+        hours_actual = mean(hours_actual),
+        erro_absoluto = abs(hours_estimate - hours_actual),
+        .groups = "drop"
+    ) 
+```
+
+
+### Dados por time
+
+Agrupando o número de Desenvolvedores que trabalharam em tarefas referentes aos Projetos.
+
+```{r}
+por_time = estimativas_raw %>% 
+    group_by(project_code) %>% 
+    summarise(devs = n_distinct(developer_id),
+              erro_medio_abs = mean(abs(hours_estimate - hours_actual)), 
+              estimativas = n(), 
+              .groups = "drop")
+```
+
+## Correlação de Valores
+
+**1- Qual a relação entre as estimativas e horas reais tomadas na empresa como um todo e como é essa relação em diferentes subcategorias de tarefa?**
+
+```{r message=FALSE, warning=FALSE, fig.align='center'}
+
+por_task %>%
+    ggplot(aes(y=hours_estimate, hours_actual)) +
+    facet_wrap(~sub_category) +
+    geom_point(size=.5, alpha=.5) +
+    geom_smooth() +
+    scale_x_continuous(breaks=seq(0,2500,1000), minor_breaks=seq(0,2500,500)) +
+    labs(title="Gráfico 1:\nRelação de Horas Estimadas x Horas Reais\npor Subcategoria das Tarefas", x="Horas Atuais", y='Horas Estimadas') +
+    theme(plot.title=element_text(hjust=0.5))
+
+por_task %>% 
+    ggplot(aes(y=hours_estimate, hours_actual)) +
+    facet_wrap(~sub_category) +
+    geom_point(size=.5, alpha=.5) +
+    geom_smooth() +
+    scale_y_log10() +
+    scale_x_continuous(breaks=seq(0,2500,1000), minor_breaks=seq(0,2500,500)) +
+    labs(title="Gráfico 2:\nRelação de Horas Estimadas (Escala Logarítmica) x Horas Reais\npor Subcategoria das Tarefas", x="Horas Atuais", y='Horas Estimadas') +
+    theme(plot.title=element_text(hjust=0.5))
+
+por_task %>% 
+    ggplot(aes(y=hours_estimate, hours_actual)) +
+    facet_wrap(~sub_category) +
+    geom_point(size=.5, alpha=.5) +
+    geom_smooth() +
+    scale_y_log10() +
+    scale_x_log10() +
+    labs(title="Gráfico 3:\nRelação de Horas Estimadas x Horas Reais\npor Subcategoria das Tarefas em Escalas Logarítmicas", x="Horas Atuais", y='Horas Estimadas') +
+    theme(plot.title=element_text(hjust=0.5))
+```
+
+```{r message=FALSE, warning=FALSE}
+por_task %>%
+    group_by(sub_category) %>% 
+    summarise(pearson=cor(hours_estimate, hours_actual, method="pearson"), 
+              spearman=cor(hours_estimate, hours_actual, method="spearman"), 
+              kendall=cor(hours_estimate, hours_actual, method="kendall")) %>%
+    ggplot(aes(y=sub_category, pearson)) +
+    scale_x_continuous(breaks=seq(0,1,0.25), minor_breaks=seq(0,1,0.1)) +
+    geom_point(color='orange', size=3, alpha=.5) +
+    geom_point(aes(x=spearman), color='lightgreen', size=3, alpha=.5) +
+    geom_point(aes(x=kendall), color='lightblue', size=3, alpha=.5) +
+    labs(title="Gráfico 4:\nCorrelações entre Horas Estimadas x Horas Reais", x="Correlações", y='Subcategorias de Tarefas') +
+    theme(plot.title=element_text(hjust=0.5))
+
+ggsave('grafico2-original.pdf')
+
+library(scales)
+
+tam = 6
+
+por_task %>%
+    group_by(sub_category) %>% 
+    summarise(pearson=cor(hours_estimate, hours_actual, method="pearson"), 
+              spearman=cor(hours_estimate, hours_actual, method="spearman"), 
+              kendall=cor(hours_estimate, hours_actual, method="kendall")) %>%
+    ggplot(aes(y=reorder(sub_category, pearson), pearson)) +
+    scale_x_continuous(breaks=seq(0,1,0.25), minor_breaks=seq(0,1,0.1)) +
+    geom_point(color='orange', size=tam, alpha=.5) +
+    geom_point(aes(x=spearman), color='lightgreen', size=tam, alpha=.5) +
+    geom_point(aes(x=kendall), color='lightblue', size=tam, alpha=.5) +
+    labs(title="Gráfico 4:\nCorrelações entre\nHoras Estimadas x Horas Reais\n", x="\nCorrelações", y='Subcategorias de Tarefas') +
+    theme(plot.title=element_text(hjust=0.5), text=element_text(size=20))
+
+ggsave('grafico2-organizado.pdf', width=9, height=8)
+```
+
+Para a questão foram construídos 4 gráficos, sendo os Gráficos 1 a 3 mostrando a relação entre as variáveis de Horas Estimadas e Horas Reais, classificadas entre as Subcategorias das tarefas, porém em escalas distintas com o intuito de amostrar alguma linearidade entre as variáveis.
+
+No Gráfico 1 foram utilizadas as escalas normais, através de gráficos de dispersão para as horas e gráficos de suavização visando possível linearidade, que como pode ser visto aparentemente as variáveis possuem pouca correlação.
+
+No Gráfico 2 foi utilizada uma escala logarítmica na base 10 no eixo das Horas Estimadas, porém sem muita diferença visual com relação às proporções do Gráfico 1.
+
+No Gráfico 3 utilizando escalas logarítmicas nos dois eixos, já é possível perceber uma linearidade dos dados, principalmente com o auxílio dos gráfico de suavização, em que é possível perceber uma linearidade positiva em basicamente todas as Subcategorias das tarefas, sendo Board Meeting e Staff Recruitment apresentando poucos valores para uma linearidade mais larga.
+
+No Gráfico 4 são apresentadas as correlações de Pearson (cor laranja), Spearman (cor verde) e de Kendall (cor azul). Pelos valores gerados, é possível observar uma correlação maior na subcategoria Board Meeting, porém é possível que tenha obtido valores altos devido a poucas tarefas registradas. Aparentemente uma subcategoria com correlação mais forte é a Technical Specification, em que as 3 correlações atingiram valores entre 0.6 e 0.85 na escala.
+
+**2- Há uma relação perceptível entre o tamanho da equipe estar relacionado com o erro médio das estimativas da equipe? Como é essa relação?**
+
+```{r message=FALSE, warning=FALSE, fig.align='center'}
+por_time %>% 
+    ggplot(aes(devs, erro_medio_abs)) +
+    geom_point() +
+    geom_smooth() +
+    scale_x_log10() +
+    scale_y_log10() +
+    labs(title="Gráfico 5:\nRelação Logarítmica entre\nDesenvolvedores x Erro Absoluto", x="Correlações", y='Subcategorias de Tarefas') +
+    theme(plot.title=element_text(hjust=0.5))
+
+por_time %>% 
+    summarise(pearson=cor(devs, erro_medio_abs, method="pearson"), 
+              spearman=cor(devs, erro_medio_abs, method="spearman"), 
+              kendall=cor(devs, erro_medio_abs, method="kendall"))
+```
+
+No Gráfico 5 é amostrada a relação entre o número de Desenvolvedores e o Erro Absoluto de horas por Projeto. Porém, não foi possível verificar uma grande correlação entre as variáveis, utilizando escalas normais e também logarítmicas. A correlação fraca fica evidente com os valores das correlações calculadas, que não ultrapassaram 0.05 do valor, atingindo inclusive valor negativo na correlação de Pearson.
+
+**3- Qual a relação entre prioridade da tarefa e erro na sua estimativa?**
+
+```{r message=FALSE, warning=FALSE, fig.align='center'}
+task_erro = por_task %>%
+    mutate(erro=hours_actual-hours_estimate)
+
+por_task %>%
+    ggplot(aes(y=priority, erro_absoluto)) +
+    geom_point(size=3, alpha=.3, color="steelblue") +
+    labs(title="Gráfico 6:\nRelação entre nível de Prioridade x Erro Absoluto das Tarefas", x="Erro Absoluto em Horas", y='Prioridade das Tarefas') +
+    theme(plot.title=element_text(hjust=0.5)) +
+    scale_y_continuous(breaks=1:10, minor_breaks=1:10)
+
+por_task %>% 
+    summarise(pearson=cor(priority, erro_absoluto, method="pearson"), 
+              spearman=cor(priority, erro_absoluto, method="spearman"), 
+              kendall=cor(priority, erro_absoluto, method="kendall"))
+```
+
+No Gráfico 6 é possível visualizar a relação entre o Nível de Prioridade com o Erro Absoluto por tarefas. Analisando visualmente, pode-se inferir de certa forma que quanto maior a prioridade, menor é a concentração de tarefas com menos erros, o que significaria numa correlação linear negativa. Porém, realizando o cálculo das correlações de Pearson, Spearman e Kendall, os valores demonstram uma correlação quase nula, para Pearson, e negativa para as demais.

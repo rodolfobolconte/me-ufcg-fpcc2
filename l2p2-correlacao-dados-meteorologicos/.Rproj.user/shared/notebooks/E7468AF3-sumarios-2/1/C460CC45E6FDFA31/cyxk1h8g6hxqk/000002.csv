@@ -1,0 +1,5 @@
+"0","variacao = clima10 %>% "
+"0","    group_by(cidade, ano) %>% "
+"0","    summarise(amplitude = max(temp_max, na.rm = TRUE) - min(temp_max, na.rm = TRUE), "
+"0","              interquartil = IQR(temp_max),"
+"0","              .groups = ""drop"")"

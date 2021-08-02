@@ -1,0 +1,5 @@
+"0","iat %>% "
+"0","    ggplot(aes(x = sex, y = d_art)) + "
+"0","    geom_quasirandom(width = .1) + "
+"0","    stat_summary(geom = ""point"", fun = ""mean"", color = ""red"", size = 3) + "
+"0","  labs(title = ""Distribuição e média (ponto vermelho) de d_art na amostra"")"

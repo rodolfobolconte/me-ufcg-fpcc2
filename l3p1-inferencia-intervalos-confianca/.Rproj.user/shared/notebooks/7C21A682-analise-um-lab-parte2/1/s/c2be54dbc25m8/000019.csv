@@ -1,0 +1,3 @@
+"0","iat %>% "
+"0","  group_by(sex) %>% "
+"0","  summarise(n=n(), mediana=median(d_art), media=mean(d_art), desvio_padrao=sd(d_art), .groups = ""drop"")"

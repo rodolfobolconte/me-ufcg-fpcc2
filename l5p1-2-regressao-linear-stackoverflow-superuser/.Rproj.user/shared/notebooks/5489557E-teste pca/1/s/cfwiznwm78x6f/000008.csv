@@ -1,0 +1,6 @@
+"0","write.csv2(df2, ""./paises-pca2.csv"")
+"
+"2","n�o foi poss�vel abrir o arquivo './paises-pca2.csv': Permission denied"
+"2","Error in file(file, ifelse(append, ""a"", ""w"")) : 
+  não é possível abrir a conexão
+"

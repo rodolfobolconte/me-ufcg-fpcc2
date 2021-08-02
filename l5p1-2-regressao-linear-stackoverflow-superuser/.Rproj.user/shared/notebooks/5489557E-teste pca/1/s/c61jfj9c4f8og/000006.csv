@@ -1,0 +1,5 @@
+"0","dados_pca = dados_pca %>% filter(site==""StackOverflow"", GNI!='NA', Internet!='NA', EPI!='NA')
+"
+"2","Error in filter(., site == ""StackOverflow"", GNI != ""NA"", Internet != ""NA"",  : 
+  objeto 'dados_pca' não encontrado
+"

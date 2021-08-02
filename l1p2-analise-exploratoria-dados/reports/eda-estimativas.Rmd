@@ -1,0 +1,187 @@
+---
+title: "Análise Exploratória do Conjunto de Dados SiP"
+author: Rodolfo Bolconte
+date: 18/04/20
+output:
+    rmdformats::readthedown
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(tidy = TRUE,
+                      fig.width = 7,
+                      fig.height = 6,
+                      fig.align="center"
+                      )
+```
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(here)
+source(here::here("code/lib.R"))
+theme_set(theme_bw())
+
+tarefas = read_projectdata()
+```
+
+## O que são os dados
+
+Conjunto de dados com informações de 12299 tarefas realizadas por 22 desenvolvedores em 20 códigos de projeto utilizando metodologia ágil.
+
+```{r echo=FALSE}
+#glimpse(tarefas)
+```
+
+## Entendendo os dados
+
+```{r}
+tarefas %>%
+    count(category) %>% 
+    ggplot(aes(n, category, fill=category)) +
+    geom_col(width=0.3) +
+    geom_text(aes(label = n), hjust = 1.2, vjust=0.3) +
+    labs(title='Gráfico 1:\nQuantidade de Tarefas por Categoria Pai', x='Quantidade', y='Categorias', fill='Categorias') +
+    theme(plot.title=element_text(hjust=0.5))
+```
+
+Ao perceber que os dados são divididos por categorias, é importante mensurar a quantidade de dados para cada uma delas. Sendo assim, é constatado através do Gráfico 1 os seguintes números: Operational com 1974; Management com 2105; e Development com 8220. De certa forma é normal pensar que num projeto de desenvolvimento de softwares, o maior número de tarefas esteja relacionado a construção (Development) dos próprios sistemas.
+
+```{r}
+tarefas %>% 
+    count(project_code) %>%
+    ggplot(aes(n, reorder(project_code, -n))) +
+    geom_col(fill="lightblue") +
+    scale_x_continuous(breaks=seq(0,5000,1000)) + 
+    geom_text(aes(label = n), hjust = 0.5, vjust=0.3, size=3) +
+    labs(title='Gráfico 2:\nQuantidade de Tarefas por Projeto', x='Quantidade', y='Projetos') +
+    theme(plot.title=element_text(hjust=0.5))
+```
+
+Além do tipo de categoria para cada tarefa, elas são divididas também por Projetos, que no conjunto de dados, constam 20 projetos de desenvolvimento, sendo o Projeto 15 com o menor número de tarefas, 3 no total, e o Projeto 2 com o maior número de tarefas, com 4553. É curioso perceber que só 3 projetos possuem mais de 1000 tarefas executadas.
+
+```{r}
+est_sumarios = tarefas %>% 
+    group_by(project_code) %>% 
+    summarise(estimativa_max=max(hours_estimate), estimativa_min=min(hours_estimate))
+
+tarefas %>%
+    ggplot(aes(hours_estimate, project_code)) +
+    geom_point(alpha=.5, color='gray', size=4) +
+    geom_point(data=est_sumarios, aes(x=estimativa_max), color='coral', size=4) +
+    geom_point(data=est_sumarios, aes(x=estimativa_min), color='steelblue', size=4) +
+    scale_x_continuous(breaks=seq(0,1000,100)) + 
+    labs(title='Gráfico 3:\nEstimativas de Horas das Tarefas por Projeto', x='Estimativas', y='Projetos') +
+    theme(plot.title=element_text(hjust=0.5))
+```
+
+De acordo com o Gráfico 3, é possível verificar as estimativas de horas para o desenvolvimento das tarefas dos projetos. Com a visualização, o Projeto 9 possui a tarefa de maior estimativa, ultrapassando as 900 horas, seguido do Projeto 10 com uma tarefa em torno de 700 horas. Com relação a distribuição das estimativas, na maioria dos projetos percebe-se uma grande concentração até as 100 horas, enquanto o mínimo de horas para as tarefas, ficam entre 0 e 1 hora, apenas com o Projeto 20 se destacando fora desta faixa de valores, sendo de 7 horas o menor valor de uma tarefa.
+
+## Distribuição de Valores
+
+Considerando que o erro em uma estimativa é a diferença entre a estimativa e o tempo que a tarefa de fato tomou e o erro absoluto é o módulo do erro. Pode-se fazer duas perguntas:
+
+```{r}
+#erro = hours_estimate - hours_actual
+#erro_absoluto = abs(erro)
+```
+
+
+**1- Como é a distribuição do erro nas estimativas de diferentes subcategorias de tarefas? Se quiser, use também as categorias nos dados.**
+
+```{r fig.width = 9}
+tarefas_erros = tarefas %>%
+    mutate(erro=hours_estimate-hours_actual, erro_absoluto=abs(erro))
+
+tarefas_erros %>%
+    ggplot(aes(x=erro, y=category, color=category)) +
+    geom_jitter(height=.4, alpha=.3, size=2) +
+    scale_x_continuous(breaks=seq(-2500,1000,500), minor_breaks=seq(-2500,1000,100)) +
+    labs(title="Gráfico 4:\nDistribuição do Erro de Estimativa\nem Horas de Tarefas por Categorias", x='Erro em Horas', y="Categorias Pai", color="Categorias") +
+    theme(plot.title=element_text(hjust=0.5))
+
+tarefas_erros %>%
+    ggplot(aes(x=erro_absoluto, y=category, color=category)) +
+    geom_jitter(height=.4, alpha=.3, size=2) +
+    scale_x_continuous(breaks=seq(-2500,2500,500), minor_breaks=seq(-2500,2500,100)) +
+    labs(title="Gráfico 5:\nDistribuição do Erro Absoluto de Estimativa\nem Horas de Tarefas por Categorias", x='Erro Absoluto em Horas', y="Categorias Pai", color="Categorias") +
+    theme(plot.title=element_text(hjust=0.5))
+```
+
+Comparando a distribuição dos erros separados por Categorias das tarefas no Gráfico 4, da pra perceber uma quantidade maior de diferença entre -50 e 50 horas nas categorias Operational e Management, enquanto na categoria Development, a faixa de valores da distribuição pode ser compreendida entre -100 e 100. Na categoria Development, ocorre um grande número de valores de -100 até -500 também em relação às duas outras categorias.
+
+Referindo-se a Outliers, a categoria Operational apresenta os maiores valores, com 5 tarefas na faixa de -2500 horas de erro, enquanto a categoria Development apresenta 3 tarefas em torno de -2000 horas de erro. Já a categoria Management apresenta outliers não tão distantes da concentração das demais tarefas, com cerca de 5 tarefas entre -600 e -550 horas de erro. 
+
+```{r fig.width=9}
+tarefas_erros %>%
+    ggplot(aes(x=erro_absoluto, y=sub_category)) +
+    geom_jitter(height=.2, alpha=.3, size=2, colour="steelblue") +
+    facet_wrap(~category, scales="free_x") +
+    scale_x_continuous(breaks=seq(0,25000,500)) +
+    labs(title="Gráfico 6:\nDistribuição do Erro Absoluto de Estimativa\nem Horas de Tarefas por Subcategorias", x='Erro Absoluto em Horas', y="Subcategorias") +
+    theme(plot.title=element_text(hjust=0.5))
+
+ggsave("grafico2-original.pdf")
+
+```
+
+Num cenário dividindo os erros por Subcategorias das tarefas, é possível definir quais subcategorias possuem maior variância de erros, o que leva em consideração também a quantidade de tarefas para cada uma.
+
+Analisando o Gráfico 6 percebemos melhor a distribuição do Erro Absoluto de 0 a 600 na categoria Management, sendo as tarefas de General Documentation e Marketing as de maiores erros respectivamente, com uma maior distribuição erros das tarefas nas subcategorias de Marketing e Office Management. Já se tratando de maior concentração de erros, podemos levar em conta as tarefas de Staff Management, Project Management e General Documentation.
+
+Na categoria Operational, fica mais evidente a pouca quantidade de tarefas em relação às demais categorias, com tarefas existentes em apenas 4 subcategorias:
+
+- In House Support, obtendo os maiores valores de outliers de erro;
+- Documentation, com concentração entre 0 e 125 horas de erro, e poucas tarefas entre 125 e 375;
+- Consultancy, tendo a maior concentração de erro, entre 0 e 125 horas;
+- Client Support, concetração semelhante com as tarefas In House Support, com um único outlier entre 750 e 1000.
+
+**2- Como se comparam as distribuições de tempo (real) das tarefas entre os diferentes times? Há times com tarefas consideravelmente maiores?**
+
+Os times a serem considerados para esta questão são os Projetos, ou seja, desenvolvedores que trabalharam em tarefas pertencentes a um determinado projeto, formam um time, independente se um desenvolvedor irá participar de 2 ou mais projetos.
+
+```{r warning=FALSE}
+tarefas %>% 
+    #filter(hours_actual>=1) %>% 
+    ggplot(aes(y=project_code, x=hours_actual)) +
+    geom_boxplot() +
+    geom_point(color='orange', alpha=.2, size=1) +
+    scale_x_continuous(breaks=seq(0,100,10),
+                       limits=c(0, 100)) +
+    labs(title="Gráfico 7:\nEstimativa de Horas Atuais de Tarefas\npor Projeto (de 0 à 100 horas)", x='Horas Atuais de Projeto', y="Projetos") +
+    theme(plot.title=element_text(hjust=0.5))
+
+tarefas %>% 
+    #filter(hours_actual>=1) %>% 
+    ggplot(aes(y=project_code, x=hours_actual)) +
+    geom_boxplot() +
+    geom_point(color='orange', alpha=.2) +
+    scale_x_continuous(breaks=seq(100,2500,400),
+                       limits=c(100, 2500)) +
+    labs(title="Gráfico 8:\nEstimativa de Horas Atuais de Tarefas\npor Projeto (de 100 à 2500 horas)", x='Horas Atuais de Projeto', y="Projetos") +
+    theme(plot.title=element_text(hjust=0.5))
+```
+
+Como forma de melhorar a visualização das horas gastar nas tarefas de acordo com os projetos, foram construídos dois gráficos, sendo o Gráfico 7 com tarefas de até 100 horas gastas e o Gráfico 8 com tarefas de mais de 100 horas, ambos construídos utilizando boxplots como forma de visualização para os 20 projetos existentes.
+
+De acordo com o Gráfico 7, é possível perceber que 50% (interquartil) das tarefas dos projetos estão entre 0 e 20 horas, sendo o Projeto 20 o único em que o interquartil se encontra acima das 20 horas, porém, este Projeto possui apenas 5 tarefas, o que "enviesa" de certa forma a interpretação da visualização do boxplot do mesmo. Os Projetos 2, 18 e 9 possuem mais outliers, com tarefas que se compreendem até próximo o valor de 100 horas, o que pode induzir como os 3 projetos que possuem tarefas com mais horas trabalhadas com relação aos demais.
+
+Analisando o Gráfico 8, já percebe-se que os Projetos 3, 8, 15, 19 e 20 não possuem tarefas que precisaram de mais de 100 horas de trabalho. Os demais Projetos, possuem seu interquartil de Tarefas entre 100 e 500 horas de trabalho, sendo o Projeto 14 com um interquartil entre 250 e 900 horas, visto o número baixo de tarefas analisadas.
+
+Pegando os três Projetos (2, 18, 9) com maior frequência de outliers no Gráfico 7 e analisando eles no Gráfico 8, é possível perceber comportamentos parecidos, com o interquartil se concentrando entre 100 e 250 horas de trabalho, com poucos outliers, apesar de alguns bem distantes, como é o caso do Projeto 18, com um outlier próximo a 900 e outro em torno de 2500 horas, evidenciando que de fato é o projeto de tarefas com mais horas trabalhadas.
+
+
+
+
+<!--## Questões
+
+Qual a distribuição das estimativas? Dos tempos de tarefa? Os tamanhos de time? Quantos projetos temos? O que mais lhe parece relevante de explorar antes de começar a trabalhar com perguntas sobre as estimativas e tempos de tarefa das pessoas que trabalharam nas tarefas que os dados descrevem? 
+
+## Duas perguntas
+
+Consideremos que o erro em uma estimativa é a diferença entre a estimativa e o tempo que a tarefa de fato tomou. O erro absoluto é o módulo do erro. 
+
+ERROR = HOURS_ESTIMATE - HOURS_ACTUAL
+ERROR_ABS = abs(ERROR)
+
+### Como é a distribuição do erro nas estimativas de diferentes subcategorias de tarefas? Se quiser, use também as categorias nos dados.
+
+### Como se comparam as distribuições de tempo (real) das tarefas entre os diferentes times? Há times com tarefas consideravelmente maiores? -->

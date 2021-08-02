@@ -1,0 +1,3 @@
+"0","modelo1 = lm(responderam_prop ~ EPI + log10(GNI) + Internet, data=dados_stackoverflow)"
+"0",""
+"0","tidy(modelo1, conf.int=T)"

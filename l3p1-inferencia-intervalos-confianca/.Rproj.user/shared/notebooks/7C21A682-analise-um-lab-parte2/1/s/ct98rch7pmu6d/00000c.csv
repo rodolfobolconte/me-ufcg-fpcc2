@@ -1,0 +1,3 @@
+"0","iat %>% "
+"0","    ggplot(aes(x = sex, y = d_art)) + "
+"0","    geom_quasirandom(width = .1)"

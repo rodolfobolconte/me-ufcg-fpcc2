@@ -1,0 +1,8 @@
+"0","sumarios_eda = dataset %>% "
+"0","  group_by(eight_regions) %>% "
+"0","  summarize(min_idv=min(IDV),"
+"0","            med_idv=mean(IDV),"
+"0","            max_idv=max(IDV),"
+"0","            min_internet=min(Internet),"
+"0","            med_internet=mean(Internet),"
+"0","            max_internet=max(Internet))"

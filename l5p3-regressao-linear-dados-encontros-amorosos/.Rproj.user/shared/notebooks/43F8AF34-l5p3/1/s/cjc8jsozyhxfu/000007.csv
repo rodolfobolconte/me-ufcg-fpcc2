@@ -1,0 +1,5 @@
+"0","variaveis_descritivas = dataset %>%"
+"0","  filter(attr!=""NA"", sinc!=""NA"", intel!=""NA"", fun!=""NA"", amb!=""NA"", dec!=""NA"") %>% "
+"0","  select(iid, attr, sinc, intel, fun, amb, dec)"
+"0",""
+"0","count(variaveis_descritivas)"

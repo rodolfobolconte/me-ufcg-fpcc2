@@ -1,0 +1,1 @@
+"0","count(variaveis_descritivas %>% group_by(dec))"

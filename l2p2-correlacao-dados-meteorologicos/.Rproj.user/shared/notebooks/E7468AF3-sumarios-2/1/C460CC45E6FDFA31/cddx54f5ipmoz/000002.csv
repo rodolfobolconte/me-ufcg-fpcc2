@@ -1,0 +1,6 @@
+"0","clima10 %>% "
+"0","    ggplot(aes(x = ano, y = temp_max)) + "
+"0","    facet_wrap(~ cidade) + "
+"0","    geom_point(size = .9, alpha = .7, color = ""gray"") + "
+"0","    stat_summary(geom = ""point"", color = ""coral"", fun = mean) +"
+"0","    stat_summary(geom = ""point"", color = ""darkblue"", fun = median) "

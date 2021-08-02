@@ -1,0 +1,22 @@
+"0","iat = read_csv(here::here(params$arquivo_dados), col_types = ""cccdc"")"
+"0","iat = iat %>% "
+"0","    mutate(sex = factor(sex, levels = c(""m"", ""f""), ordered = TRUE))"
+"0","glimpse(iat)"
+"1","Rows: 81"
+"1",""
+"1","
+"
+"1","Columns: 5"
+"1",""
+"1","
+"
+"1","$ session_id  [3m[38;5;246m<chr>[39m[23m ""2443384"", ""2443392"", ""2443401"", ""2443436""~
+$ referrer    [3m[38;5;246m<chr>[39m[23m ""uva"", ""uva"", ""uva"", ""uva"", ""uva"", ""uva"", ~
+$ sex         [3m[38;5;246m<ord>[39m[23m f, m, f, f, m, f, m, f, f, f, m, m, f, f, ~
+$ d_art       [3m[38;5;246m<dbl>[39m[23m 0.96727471, 0.36139986, 0.49682691, 0.7014~
+$ iat_exclude [3m[38;5;246m<chr>[39m[23m ""Include"", ""Include"", ""Include"", ""Include""~"
+"1",""
+"1","
+"
+"0","iat %>% "
+"0","  count(sex)"
